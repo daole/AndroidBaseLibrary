@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="btn__ok">はい</string>
+    <string name="btn__no">いいえ</string>
+
+    <string name="title__dialog">メッセージ</string>
+    <string name="title__dialog_error">エラー</string>
+</resources>

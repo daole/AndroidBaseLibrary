@@ -1,0 +1,7 @@
+<resources>
+    <string name="btn__ok">OK</string>
+    <string name="btn__no">No</string>
+
+    <string name="title__dialog">Message</string>
+    <string name="title__dialog_error">Error</string>
+</resources>
