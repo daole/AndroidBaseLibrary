@@ -10,20 +10,20 @@ import android.os.Bundle;
 
 import java.util.GregorianCalendar;
 
-public class AlarmUtils {
+public class UtilsAlarm {
     public static final String INTENT_EXTRA_KEY__DATA = "extra";
 
     public static PendingIntent createPendingIntent(Context pContext, Class pActivityClass, int pId, int pFlag, Bundle pExtras) {
         Intent intent = new Intent(pActivityClass.getName());
-        if(pExtras != null) {
-            intent.putExtra(AlarmUtils.INTENT_EXTRA_KEY__DATA, pExtras);
+        if (pExtras != null) {
+            intent.putExtra(UtilsAlarm.INTENT_EXTRA_KEY__DATA, pExtras);
         }
         PendingIntent pendingIntent = PendingIntent.getActivity(pContext, pId, intent, pFlag);
         return pendingIntent;
     }
 
     public static void cancelAlarm(Context pContext, PendingIntent pPendingIntent) {
-        AlarmManager alarmManager = (AlarmManager)pContext.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) pContext.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pPendingIntent);
     }
 
@@ -31,7 +31,7 @@ public class AlarmUtils {
         GregorianCalendar gregorianCalendar = new GregorianCalendar(pYear, pMonth, pDate, pHour, pMinute);
         long alarmTime = gregorianCalendar.getTimeInMillis();
         long currentTime = System.currentTimeMillis();
-        if(alarmTime > currentTime) {
+        if (alarmTime > currentTime) {
             AlarmManager alarmManager = (AlarmManager) pContext.getSystemService(Context.ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, pPendingIntent);
         }

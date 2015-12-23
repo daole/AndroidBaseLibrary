@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views.implementations.activities;
+package com.dreamdigitizers.androidbaselibrary.views.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,16 +6,38 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import com.dreamdigitizers.androidbaselibrary.ApplicationBase;
-import com.dreamdigitizers.androidbaselibrary.views.implementations.fragments.FragmentBase;
-import com.dreamdigitizers.androidbaselibrary.views.implementations.fragments.screens.Screen;
+import com.dreamdigitizers.androidbaselibrary.views.fragments.screens.ScreenBase;
+import com.dreamdigitizers.androidbaselibrary.views.fragments.FragmentBase;
 
-public abstract class ActivityBase extends AppCompatActivity implements FragmentBase.IStateChecker, Screen.IOnScreenActionsListener {
-    protected Screen mCurrentScreen;
+public abstract class ActivityBase extends AppCompatActivity implements FragmentBase.IStateChecker, ScreenBase.IOnScreenActionsListener {
+    protected ScreenBase mCurrentScreen;
     protected boolean mIsRecreated;
 
     @Override
+    protected void onCreate(Bundle pSavedInstanceState) {
+        super.onCreate(pSavedInstanceState);
+
+        this.setLayout();
+        this.retrieveItems();
+        this.mapInformationToItems();
+
+        if (pSavedInstanceState != null) {
+            this.recoverInstanceState(pSavedInstanceState);
+        }
+
+        Bundle extras = this.getIntent().getExtras();
+        if (extras != null) {
+            this.handleExtras(extras);
+        }
+
+        if (!this.mIsRecreated) {
+            this.changeScreen(this.getStartScreen());
+        }
+    }
+
+    @Override
     public void onBackPressed() {
-        if(this.mCurrentScreen != null) {
+        if (this.mCurrentScreen != null) {
             boolean isHandled = this.mCurrentScreen.onBackPressed();
             if(isHandled) {
                 return;
@@ -23,20 +45,6 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
         }
 
         this.back();
-    }
-
-    @Override
-    protected void onCreate(Bundle pSavedInstanceState) {
-        super.onCreate(pSavedInstanceState);
-
-        if(pSavedInstanceState != null) {
-            this.recoverInstanceState(pSavedInstanceState);
-        }
-
-        Bundle extras = this.getIntent().getExtras();
-        if(extras != null) {
-            this.handleExtras(extras);
-        }
     }
 
     @Override
@@ -50,24 +58,24 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     }
 
     @Override
-    public void onSetCurrentScreen(Screen pCurrentScreen) {
+    public void onSetCurrentScreen(ScreenBase pCurrentScreen) {
         this.mCurrentScreen = pCurrentScreen;
     }
 
     @Override
-    public void onChangeScreen(Screen pScreen) {
+    public void onChangeScreen(ScreenBase pScreen) {
         this.changeScreen(pScreen);
     }
 
     @Override
-    public void returnActivityResult(int pResultCode, Intent pData) {
+    public void onReturnActivityResult(int pResultCode, Intent pData) {
         this.setResult(pResultCode, pData);
         this.finish();
     }
 
     @Override
-    public void changeLanguage(String pLanguage) {
-        ApplicationBase applicationBase = (ApplicationBase)this.getApplication();
+    public void onChangeLanguage(String pLanguage) {
+        ApplicationBase applicationBase = (ApplicationBase) this.getApplication();
         applicationBase.setLocale(pLanguage);
     }
 
@@ -76,20 +84,20 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
         this.back();
     }
 
-    public void changeScreen(Screen pScreen) {
+    public void changeScreen(ScreenBase pScreen) {
         this.changeScreen(pScreen, true, true);
     }
 
-    public void changeScreen(Screen pScreen, boolean pIsUseAnimation) {
+    public void changeScreen(ScreenBase pScreen, boolean pIsUseAnimation) {
         this.changeScreen(pScreen, true, pIsUseAnimation);
     }
 
-    public void changeScreen(Screen pScreen, boolean pIsUseAnimation, boolean pIsAddToTransaction) {
+    public void changeScreen(ScreenBase pScreen, boolean pIsUseAnimation, boolean pIsAddToTransaction) {
         try {
             if (pScreen != null) {
                 String className = pScreen.getClass().getName();
 
-                if(pScreen.shouldPopBackStack()) {
+                if (pScreen.shouldPopBackStack()) {
                     boolean result = this.getSupportFragmentManager().popBackStackImmediate(className, 0);
                     if (result) {
                         return;
@@ -98,7 +106,7 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
 
                 FragmentTransaction fragmentTransaction = this.getSupportFragmentManager().beginTransaction();
 
-                if(pIsUseAnimation) {
+                if (pIsUseAnimation) {
                     //fragmentTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
                 }
 
@@ -118,7 +126,7 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
 
     public void back() {
         int backStackEntryCount = this.getSupportFragmentManager().getBackStackEntryCount();
-        if(backStackEntryCount <= 1) {
+        if (backStackEntryCount <= 1) {
             this.finish();
             return;
         }
@@ -134,8 +142,11 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     }
 
     protected void handleExtras(Bundle pExtras) {
-
     }
 
+    protected abstract void setLayout();
+    protected abstract void retrieveItems();
+    protected abstract void mapInformationToItems();
+    protected abstract ScreenBase getStartScreen();
     protected abstract int getScreenContainerViewId();
 }

@@ -7,8 +7,8 @@ import android.util.Log;
 
 import java.io.File;
 
-public class FileUtils {
-    private static final String TAG = FileUtils.class.getName();
+public class UtilsFile {
+    private static final String TAG = UtilsFile.class.getName();
 
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
@@ -29,7 +29,7 @@ public class FileUtils {
     public static boolean deleteFile(String pFilePath) {
         boolean result = true;
         File file = new File(pFilePath);
-        if(file.exists()) {
+        if (file.exists()) {
             result = file.delete();
         }
 
@@ -37,13 +37,13 @@ public class FileUtils {
     }
 
     public static File getOutputMediaFile(String pFolderName, String pFileName) {
-        if(!FileUtils.isExternalStorageWritable()) {
+        if (!UtilsFile.isExternalStorageWritable()) {
             return null;
         }
 
         File mediaStorageFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), pFolderName);
-        if(!mediaStorageFolder.exists()) {
-            if(!mediaStorageFolder.mkdirs()) {
+        if (!mediaStorageFolder.exists()) {
+            if (!mediaStorageFolder.mkdirs()) {
                 Log.d(TAG, "Failed to create directory");
                 return null;
             }
@@ -64,7 +64,7 @@ public class FileUtils {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(pImagePath, options);
 
-        options.inSampleSize = FileUtils.calculateInSampleSize(options, pWidth, pHeight);
+        options.inSampleSize = UtilsFile.calculateInSampleSize(options, pWidth, pHeight);
 
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeFile(pImagePath, options);

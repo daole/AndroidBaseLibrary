@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 
-public class StringUtils {
+public class UtilsString {
     public static boolean isEmpty(String pValue) {
         return TextUtils.isEmpty(pValue);
     }

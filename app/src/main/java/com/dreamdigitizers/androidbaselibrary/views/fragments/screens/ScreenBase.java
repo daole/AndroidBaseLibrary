@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views.implementations.fragments.screens;
+package com.dreamdigitizers.androidbaselibrary.views.fragments.screens;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,15 +9,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.dreamdigitizers.androidbaselibrary.R;
-import com.dreamdigitizers.androidbaselibrary.utils.DialogUtils;
-import com.dreamdigitizers.androidbaselibrary.views.abstracts.IView;
-import com.dreamdigitizers.androidbaselibrary.views.implementations.fragments.FragmentBase;
+import com.dreamdigitizers.androidbaselibrary.presenters.Presenter;
+import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
+import com.dreamdigitizers.androidbaselibrary.views.IView;
+import com.dreamdigitizers.androidbaselibrary.views.fragments.FragmentBase;
 
-public abstract class Screen extends FragmentBase implements IView {
+import java.lang.reflect.InvocationTargetException;
+
+public abstract class ScreenBase<P extends Presenter> extends FragmentBase implements IView {
 	private static final String ERROR_MESSAGE__CONTEXT_NOT_IMPLEMENTS_INTERFACE = "Activity must implement IOnScreenActionsListener.";
 
 	protected boolean mIsRecoverable;
-
+	protected P mPresenter;
 	protected IOnScreenActionsListener mScreenActionsListener;
 
 	public void onSaveInstanceState(Bundle pOutState) {
@@ -28,33 +31,45 @@ public abstract class Screen extends FragmentBase implements IView {
 	@Override
 	public void onAttach(Context pContext) {
 		super.onAttach(pContext);
-
 		try {
-			this.mScreenActionsListener = (IOnScreenActionsListener)pContext;
+			this.mScreenActionsListener = (IOnScreenActionsListener) pContext;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(Screen.ERROR_MESSAGE__CONTEXT_NOT_IMPLEMENTS_INTERFACE);
+			throw new ClassCastException(ScreenBase.ERROR_MESSAGE__CONTEXT_NOT_IMPLEMENTS_INTERFACE);
+		}
+	}
+
+	@Override
+	public void onCreate(Bundle pSavedInstanceState) {
+		super.onCreate(pSavedInstanceState);
+		try {
+			this.mPresenter = this.createPresenter();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (java.lang.InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-
 		this.mScreenActionsListener.onSetCurrentScreen(this);
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-
-		InputMethodManager imm = (InputMethodManager)this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(this.getView().getWindowToken(), 0);
 	}
 
 	@Override
 	public void onDetach() {
 		super.onDetach();
-
 		this.mScreenActionsListener = null;
 	}
 
@@ -69,12 +84,12 @@ public abstract class Screen extends FragmentBase implements IView {
 	}
 
 	@Override
-	public void showConfirmation(int pStringResourceId, DialogUtils.IOnDialogButtonClickListener pListener) {
+	public void showConfirmation(int pStringResourceId, UtilsDialog.IOnDialogButtonClickListener pListener) {
 		String title = this.getString(R.string.title__dialog);
 		String positiveButtonText = this.getString(R.string.btn__ok);
 		String negativeButtonText = this.getString(R.string.btn__no);
 		String message = this.getString(pStringResourceId);
-		DialogUtils.displayDialog(this.getActivity(), title, message, true, positiveButtonText, negativeButtonText, pListener);
+		UtilsDialog.displayDialog(this.getActivity(), title, message, true, positiveButtonText, negativeButtonText, pListener);
 	}
 
 	@Override
@@ -82,7 +97,7 @@ public abstract class Screen extends FragmentBase implements IView {
 		String title = this.getString(R.string.title__dialog_error);
 		String buttonText = this.getString(R.string.btn__ok);
 		String message = this.getString(pStringResourceId);
-		DialogUtils.displayErrorDialog(this.getActivity(), title, message, buttonText);
+		UtilsDialog.displayErrorDialog(this.getActivity(), title, message, buttonText);
 	}
 
 	public boolean shouldPopBackStack() {
@@ -90,7 +105,7 @@ public abstract class Screen extends FragmentBase implements IView {
 	}
 	
 	protected void addChildToViewGroup(ViewGroup pParent, View pChild, int pPosition) {
-		if(pPosition >= 0) {
+		if (pPosition >= 0) {
 			pParent.addView(pChild, pPosition);
 		} else {
 			pParent.addView(pChild);
@@ -98,12 +113,12 @@ public abstract class Screen extends FragmentBase implements IView {
 	}
 	
 	protected void replaceViewInViewGroup(ViewGroup pParent, View pChild, int pPosition) {
-		if(pPosition < 0) {
+		if (pPosition < 0) {
 			pPosition = 0;
 		}
 		
 		int childCount = pParent.getChildCount();
-		if(pPosition >= childCount) {
+		if (pPosition >= childCount) {
 			pPosition = childCount - 1;
 		}
 		
@@ -115,11 +130,13 @@ public abstract class Screen extends FragmentBase implements IView {
 		return this.getResources().getConfiguration().orientation;
 	}
 
+	protected abstract P createPresenter() throws InvocationTargetException, NoSuchMethodException, java.lang.InstantiationException, IllegalAccessException;
+
 	public interface IOnScreenActionsListener {
-		void onSetCurrentScreen(Screen pCurrentScreen);
-		void onChangeScreen(Screen pScreen);
-		void returnActivityResult(int pResultCode, Intent pData);
-		void changeLanguage(String pLanguage);
+		void onSetCurrentScreen(ScreenBase pCurrentScreen);
+		void onChangeScreen(ScreenBase pScreen);
+		void onReturnActivityResult(int pResultCode, Intent pData);
+		void onChangeLanguage(String pLanguage);
 		void onBack();
 	}
 }

@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views.implementations.fragments;
+package com.dreamdigitizers.androidbaselibrary.views.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -19,9 +19,8 @@ public abstract class FragmentBase extends Fragment {
     @Override
     public void onAttach(Context pContext) {
         super.onAttach(pContext);
-
         try {
-            this.mStateChecker = (IStateChecker)pContext;
+            this.mStateChecker = (IStateChecker) pContext;
         } catch (ClassCastException e) {
             throw new ClassCastException(FragmentBase.ERROR_MESSAGE__CONTEXT_NOT_IMPLEMENTS_INTERFACE);
         }
@@ -32,16 +31,16 @@ public abstract class FragmentBase extends Fragment {
         super.onCreate(pSavedInstanceState);
 
         Bundle extras = this.getActivity().getIntent().getExtras();
-        if(extras != null) {
+        if (extras != null) {
             this.handleExtras(extras);
         }
 
         Bundle arguments = this.getArguments();
-        if(arguments != null) {
+        if (arguments != null) {
             this.retrieveArguments(arguments);
         }
 
-        if(pSavedInstanceState != null) {
+        if (pSavedInstanceState != null) {
             this.recoverInstanceState(pSavedInstanceState);
         }
     }
@@ -57,7 +56,7 @@ public abstract class FragmentBase extends Fragment {
 
     @Override
     final public void onCreateOptionsMenu(Menu pMenu, MenuInflater pInflater) {
-        if(!this.mStateChecker.isBeingCovered(this)) {
+        if (!this.mStateChecker.isBeingCovered(this)) {
             this.createOptionsMenu(pMenu, pInflater);
             ActionBar actionBar = this.getActionBar();
             actionBar.setDisplayShowTitleEnabled(true);
@@ -70,23 +69,19 @@ public abstract class FragmentBase extends Fragment {
     }
 
     protected ActionBar getActionBar() {
-        return ((AppCompatActivity)this.getActivity()).getSupportActionBar();
+        return ((AppCompatActivity) this.getActivity()).getSupportActionBar();
     }
 
     protected void createOptionsMenu(Menu pMenu, MenuInflater pInflater) {
-
     }
 
     protected void handleExtras(Bundle pExtras) {
-
     }
 
     protected void retrieveArguments(Bundle pArguments) {
-
     }
 
     protected void recoverInstanceState(Bundle pSavedInstanceState) {
-
     }
 
     protected abstract View loadView(LayoutInflater pInflater, ViewGroup pContainer);

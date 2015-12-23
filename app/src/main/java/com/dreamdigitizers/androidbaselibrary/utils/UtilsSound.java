@@ -8,34 +8,34 @@ import android.net.Uri;
 
 import java.io.IOException;
 
-public class SoundUtils {
+public class UtilsSound {
     private static MediaPlayer mediaPlayer;
 
     public static boolean isPlaying() {
-        if(SoundUtils.mediaPlayer == null) {
+        if (UtilsSound.mediaPlayer == null) {
             return false;
         }
-        return SoundUtils.mediaPlayer.isPlaying();
+        return UtilsSound.mediaPlayer.isPlaying();
     }
 
     public static void playCameraShutterSound(Context pContext) {
-        AudioManager audioManager = (AudioManager)pContext.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) pContext.getSystemService(Context.AUDIO_SERVICE);
         audioManager.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
     }
 
     public static void playAlarmSound(Context pContext) {
         try {
-            Uri uri = SoundUtils.getAlarmUri();
+            Uri uri = UtilsSound.getAlarmUri();
 
-            final AudioManager audioManager = (AudioManager)pContext.getSystemService(Context.AUDIO_SERVICE);
-            if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
-                if(SoundUtils.mediaPlayer == null) {
-                    SoundUtils.mediaPlayer = new MediaPlayer();
+            final AudioManager audioManager = (AudioManager) pContext.getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
+                if (UtilsSound.mediaPlayer == null) {
+                    UtilsSound.mediaPlayer = new MediaPlayer();
                 }
-                SoundUtils.mediaPlayer.setDataSource(pContext, uri);
-                SoundUtils.mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-                SoundUtils.mediaPlayer.prepare();
-                SoundUtils.mediaPlayer.start();
+                UtilsSound.mediaPlayer.setDataSource(pContext, uri);
+                UtilsSound.mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+                UtilsSound.mediaPlayer.prepare();
+                UtilsSound.mediaPlayer.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,21 +43,21 @@ public class SoundUtils {
     }
 
     public static void stop() {
-        if(SoundUtils.mediaPlayer != null) {
-            SoundUtils.mediaPlayer.stop();
+        if (UtilsSound.mediaPlayer != null) {
+            UtilsSound.mediaPlayer.stop();
         }
     }
 
     public static void reset() {
-        if(SoundUtils.mediaPlayer != null) {
-            SoundUtils.mediaPlayer.reset();
+        if (UtilsSound.mediaPlayer != null) {
+            UtilsSound.mediaPlayer.reset();
         }
     }
 
     public static void release() {
-        if(SoundUtils.mediaPlayer != null) {
-            SoundUtils.mediaPlayer.release();
-            SoundUtils.mediaPlayer = null;
+        if (UtilsSound.mediaPlayer != null) {
+            UtilsSound.mediaPlayer.release();
+            UtilsSound.mediaPlayer = null;
         }
     }
 

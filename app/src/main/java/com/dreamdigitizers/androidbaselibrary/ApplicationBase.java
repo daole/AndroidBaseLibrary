@@ -12,7 +12,7 @@ public class ApplicationBase extends Application {
     @Override
     public void onConfigurationChanged(Configuration pNewConfig) {
         super.onConfigurationChanged(pNewConfig);
-        if(!TextUtils.isEmpty(this.mLanguage)) {
+        if (!TextUtils.isEmpty(this.mLanguage)) {
             this.setLocale(this.mLanguage);
         }
     }
