@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views.fragments.screens;
+package com.dreamdigitizers.androidbaselibrary.views.classes.fragments.screens;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,14 +9,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.dreamdigitizers.androidbaselibrary.R;
-import com.dreamdigitizers.androidbaselibrary.presenters.Presenter;
+import com.dreamdigitizers.androidbaselibrary.presenters.interfaces.IPresenter;
 import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
-import com.dreamdigitizers.androidbaselibrary.views.IView;
-import com.dreamdigitizers.androidbaselibrary.views.fragments.FragmentBase;
+import com.dreamdigitizers.androidbaselibrary.views.interfaces.IView;
+import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.FragmentBase;
 
-import java.lang.reflect.InvocationTargetException;
-
-public abstract class ScreenBase<P extends Presenter> extends FragmentBase implements IView {
+public abstract class ScreenBase<P extends IPresenter> extends FragmentBase implements IView {
 	private static final String ERROR_MESSAGE__CONTEXT_NOT_IMPLEMENTS_INTERFACE = "Activity must implement IOnScreenActionsListener.";
 
 	protected boolean mIsRecoverable;
@@ -41,17 +39,7 @@ public abstract class ScreenBase<P extends Presenter> extends FragmentBase imple
 	@Override
 	public void onCreate(Bundle pSavedInstanceState) {
 		super.onCreate(pSavedInstanceState);
-		try {
-			this.mPresenter = this.createPresenter();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (java.lang.InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
+		this.mPresenter = this.createPresenter();
 	}
 
 	@Override
@@ -130,7 +118,7 @@ public abstract class ScreenBase<P extends Presenter> extends FragmentBase imple
 		return this.getResources().getConfiguration().orientation;
 	}
 
-	protected abstract P createPresenter() throws InvocationTargetException, NoSuchMethodException, java.lang.InstantiationException, IllegalAccessException;
+	protected abstract P createPresenter();
 
 	public interface IOnScreenActionsListener {
 		void onSetCurrentScreen(ScreenBase pCurrentScreen);

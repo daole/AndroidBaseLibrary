@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views.fragments;
+package com.dreamdigitizers.androidbaselibrary.views.classes.fragments;
 
 import android.content.Context;
 import android.os.Bundle;

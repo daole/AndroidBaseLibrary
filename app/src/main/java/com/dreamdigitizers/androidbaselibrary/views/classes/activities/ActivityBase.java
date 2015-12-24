@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views.activities;
+package com.dreamdigitizers.androidbaselibrary.views.classes.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,8 +6,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import com.dreamdigitizers.androidbaselibrary.ApplicationBase;
-import com.dreamdigitizers.androidbaselibrary.views.fragments.screens.ScreenBase;
-import com.dreamdigitizers.androidbaselibrary.views.fragments.FragmentBase;
+import com.dreamdigitizers.androidbaselibrary.R;
+import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.screens.ScreenBase;
+import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.FragmentBase;
 
 public abstract class ActivityBase extends AppCompatActivity implements FragmentBase.IStateChecker, ScreenBase.IOnScreenActionsListener {
     protected ScreenBase mCurrentScreen;
@@ -82,6 +83,32 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     @Override
     public void onBack() {
         this.back();
+    }
+
+    public void changeActivityWithoutAnimation(Intent pIntent) {
+        this.changeActivity(pIntent, false, 0, 0);
+    }
+
+    public void changeActivityWithoutAnimation(Intent pIntent, boolean pIsFinish) {
+        this.changeActivity(pIntent, pIsFinish, 0, 0);
+    }
+
+    public void changeActivity(Intent pIntent) {
+        this.changeActivity(pIntent, false, R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    public void changeActivity(Intent pIntent, boolean pIsFinish) {
+        this.changeActivity(pIntent, pIsFinish, R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    public void changeActivity(Intent pIntent, boolean pIsFinish, int pEnterAnimationResourceId, int pExitAnimationResourceId) {
+        this.startActivity(pIntent);
+        if(pEnterAnimationResourceId != 0 && pExitAnimationResourceId != 0) {
+            this.overridePendingTransition(pEnterAnimationResourceId, pExitAnimationResourceId);
+        }
+        if (pIsFinish) {
+            this.finish();
+        }
     }
 
     public void changeScreen(ScreenBase pScreen) {

@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.views;
+package com.dreamdigitizers.androidbaselibrary.views.interfaces;
 
 import android.content.Context;
 
