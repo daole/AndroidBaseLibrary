@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.dreamdigitizers.androidbaselibrary.R;
 import com.dreamdigitizers.androidbaselibrary.presenters.interfaces.IPresenter;
 import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
+import com.dreamdigitizers.androidbaselibrary.views.classes.activities.ActivityBase;
 import com.dreamdigitizers.androidbaselibrary.views.interfaces.IView;
 import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.FragmentBase;
 
@@ -90,6 +91,12 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 
 	public boolean shouldPopBackStack() {
 		return false;
+	}
+
+	protected void changeActivityAndFinish(Class pTargetActivityClass) {
+		Intent intent = new Intent(this.getContext(), pTargetActivityClass);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+		((ActivityBase) this.getActivity()).changeActivity(intent, true);
 	}
 	
 	protected void addChildToViewGroup(ViewGroup pParent, View pChild, int pPosition) {
