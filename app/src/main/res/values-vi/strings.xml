@@ -5,4 +5,6 @@
 
     <string name="title__dialog">Thông tin</string>
     <string name="title__dialog_error">Lỗi</string>
+
+    <string name="message__loading">D9ang tải...</string>
 </resources>

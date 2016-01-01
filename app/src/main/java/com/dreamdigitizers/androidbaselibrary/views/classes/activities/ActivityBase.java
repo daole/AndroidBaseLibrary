@@ -18,10 +18,6 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
 
-        this.setLayout();
-        this.retrieveItems();
-        this.mapInformationToItems();
-
         if (pSavedInstanceState != null) {
             this.recoverInstanceState(pSavedInstanceState);
         }
@@ -30,6 +26,10 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
         if (extras != null) {
             this.handleExtras(extras);
         }
+
+        this.setLayout();
+        this.retrieveItems();
+        this.mapInformationToItems();
 
         if (!this.mIsRecreated) {
             this.changeScreen(this.getStartScreen());

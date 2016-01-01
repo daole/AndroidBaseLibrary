@@ -18,7 +18,7 @@ public class UtilsDialog {
 	private static TimePickerDialog timePickerDialog;
 	private static ProgressDialog progressDialog;
 	
-	public static void displayDialog(
+	public static void showDialog(
 			final Activity pActivity,
 			final String pTitle,
 			final String pMessage,
@@ -67,7 +67,7 @@ public class UtilsDialog {
 		});
 	}
 	
-	public static void displayErrorDialog(
+	public static void showErrorDialog(
 			final Activity pActivity,
 			final String pTitle,
 			final String pMessage,
@@ -93,10 +93,10 @@ public class UtilsDialog {
 					String pNegativeButtonText) {
 			}
 		};
-		UtilsDialog.displayDialog(pActivity, pTitle, pMessage, false, pButtonText, null, dialogButtonClickListener);
+		UtilsDialog.showDialog(pActivity, pTitle, pMessage, false, pButtonText, null, dialogButtonClickListener);
 	}
 
-	public static void displayDatePickerDialog(
+	public static void showDatePickerDialog(
 			final Activity pActivity,
 			final String pCancelButtonText,
 			final IOnDatePickerDialogEventListener pListener) {
@@ -109,7 +109,7 @@ public class UtilsDialog {
 							if (pListener != null) {
 								pListener.onDateSet(pYear, pMonthOfYear, pDayOfMonth, pActivity, pCancelButtonText);
 							}
-							UtilsDialog.closeDatePickerDialog();
+							UtilsDialog.hideDatePickerDialog();
 						}
 					},
 					calendar.get(Calendar.YEAR),
@@ -121,21 +121,21 @@ public class UtilsDialog {
 					if (pListener != null) {
 						pListener.onCancel(pActivity, pCancelButtonText);
 					}
-					UtilsDialog.closeDatePickerDialog();
+					UtilsDialog.hideDatePickerDialog();
 				}
 			});
 			UtilsDialog.datePickerDialog.show();
 		}
 	}
 
-	public static void closeDatePickerDialog() {
+	public static void hideDatePickerDialog() {
 		if (UtilsDialog.datePickerDialog != null) {
 			UtilsDialog.datePickerDialog.dismiss();
 			UtilsDialog.datePickerDialog = null;
 		}
 	}
 
-	public static void displayTimePickerDialog(
+	public static void showTimePickerDialog(
 			final Activity pActivity,
 			final String pCancelButtonText,
 			final boolean pIs24HourView,
@@ -149,7 +149,7 @@ public class UtilsDialog {
 							if (pListener != null) {
 								pListener.onTimeSet(pHourOfDay, pMinute, pActivity, pCancelButtonText, pIs24HourView);
 							}
-							UtilsDialog.closeTimePickerDialog();
+							UtilsDialog.hideTimePickerDialog();
 						}
 					},
 					calendar.get(Calendar.HOUR_OF_DAY),
@@ -161,21 +161,21 @@ public class UtilsDialog {
 					if (pListener != null) {
 						pListener.onCancel(pActivity, pCancelButtonText, pIs24HourView);
 					}
-					UtilsDialog.closeTimePickerDialog();
+					UtilsDialog.hideTimePickerDialog();
 				}
 			});
 			UtilsDialog.timePickerDialog.show();
 		}
 	}
 
-	public static void closeTimePickerDialog() {
+	public static void hideTimePickerDialog() {
 		if (UtilsDialog.timePickerDialog != null) {
 			UtilsDialog.timePickerDialog.dismiss();
 			UtilsDialog.timePickerDialog = null;
 		}
 	}
 	
-	public static void displayProgressDialog(
+	public static void showProgressDialog(
 			final Activity pActivity,
 			final int pStyle,
 			final String pTitle,
@@ -208,7 +208,7 @@ public class UtilsDialog {
 									pIsCanceledOnTouchOutside,
 									pIndeterminate);
 						}
-						UtilsDialog.closeProgressDialog();
+						UtilsDialog.hideProgressDialog();
 				    }
 				});
 			}
@@ -219,15 +219,15 @@ public class UtilsDialog {
 		}
 	}
 	
-	public static void closeProgressDialog() {
+	public static void hideProgressDialog() {
 		if (UtilsDialog.progressDialog != null) {
 			UtilsDialog.progressDialog.dismiss();
 			UtilsDialog.progressDialog = null;
 		}
 	}
 
-	public static void displayNetworkProgressDialog(final Activity pActivity, final String pTitle, final String pMessage) {
-		UtilsDialog.displayProgressDialog(
+	public static void showNetworkProgressDialog(final Activity pActivity, final String pTitle, final String pMessage) {
+		UtilsDialog.showProgressDialog(
 				pActivity,
 				ProgressDialog.STYLE_SPINNER,
 				pTitle,
@@ -239,8 +239,8 @@ public class UtilsDialog {
 				null);
 	}
 
-	public static void closeNetworkProgressDialog() {
-		UtilsDialog.closeProgressDialog();
+	public static void hideNetworkProgressDialog() {
+		UtilsDialog.hideProgressDialog();
 	}
 
 	public interface IOnDialogButtonClickListener {

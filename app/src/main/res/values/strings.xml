@@ -4,4 +4,6 @@
 
     <string name="title__dialog">Message</string>
     <string name="title__dialog_error">Error</string>
+
+    <string name="message__loading">Loading...</string>
 </resources>

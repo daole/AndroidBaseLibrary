@@ -78,7 +78,7 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 		String positiveButtonText = this.getString(R.string.btn__ok);
 		String negativeButtonText = this.getString(R.string.btn__no);
 		String message = this.getString(pStringResourceId);
-		UtilsDialog.displayDialog(this.getActivity(), title, message, true, positiveButtonText, negativeButtonText, pListener);
+		UtilsDialog.showDialog(this.getActivity(), title, message, true, positiveButtonText, negativeButtonText, pListener);
 	}
 
 	@Override
@@ -86,7 +86,17 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 		String title = this.getString(R.string.title__dialog_error);
 		String buttonText = this.getString(R.string.btn__ok);
 		String message = this.getString(pStringResourceId);
-		UtilsDialog.displayErrorDialog(this.getActivity(), title, message, buttonText);
+		UtilsDialog.showErrorDialog(this.getActivity(), title, message, buttonText);
+	}
+
+	@Override
+	public void showProgress() {
+		UtilsDialog.showNetworkProgressDialog(this.getActivity(), this.getString(R.string.title__dialog), this.getString(R.string.message__loading));
+	}
+
+	@Override
+	public void hideProgress() {
+		UtilsDialog.hideProgressDialog();
 	}
 
 	public boolean shouldPopBackStack() {

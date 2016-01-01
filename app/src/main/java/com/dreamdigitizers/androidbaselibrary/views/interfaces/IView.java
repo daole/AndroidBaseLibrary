@@ -9,4 +9,6 @@ public interface IView {
     void showMessage(int pStringResourceId);
     void showConfirmation(int pStringResourceId, UtilsDialog.IOnDialogButtonClickListener pListener);
     void showError(int pStringResourceId);
+    void showProgress();
+    void hideProgress();
 }
