@@ -22,6 +22,7 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 	protected P mPresenter;
 	protected IOnScreenActionsListener mScreenActionsListener;
 
+	@Override
 	public void onSaveInstanceState(Bundle pOutState) {
 		super.onSaveInstanceState(pOutState);
 		this.mIsRecoverable = true;
@@ -63,17 +64,25 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 	}
 
 	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if(this.mPresenter != null) {
+			this.mPresenter.dispose();
+		}
+	}
+
+	@Override
 	public Context getViewContext() {
 		return this.getContext();
 	}
 
 	@Override
-	public void showMessage(int pStringResourceId) {
+	public void showMessage(final int pStringResourceId) {
 		Toast.makeText(this.getActivity(), pStringResourceId, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
-	public void showConfirmation(int pStringResourceId, UtilsDialog.IOnDialogButtonClickListener pListener) {
+	public void showConfirmation(final int pStringResourceId, final UtilsDialog.IOnDialogButtonClickListener pListener) {
 		String title = this.getString(R.string.title__dialog);
 		String positiveButtonText = this.getString(R.string.btn__ok);
 		String negativeButtonText = this.getString(R.string.btn__no);
@@ -82,7 +91,7 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 	}
 
 	@Override
-	public void showError(int pStringResourceId) {
+	public void showError(final int pStringResourceId) {
 		String title = this.getString(R.string.title__dialog_error);
 		String buttonText = this.getString(R.string.btn__ok);
 		String message = this.getString(pStringResourceId);
@@ -90,13 +99,29 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 	}
 
 	@Override
-	public void showProgress() {
+	public void showRetryableError(final int pStringResourceId, final boolean pIsEndActivity, final UtilsDialog.IRetryAction pRetryAction) {
+		String title = this.getString(R.string.title__dialog_error);
+		String positiveButtonText = this.getString(R.string.btn__ok);
+		String negativeButtonText = this.getString(R.string.btn__no);
+		String message = this.getString(pStringResourceId);
+		UtilsDialog.showRetryableErrorDialog(
+				this.getActivity(),
+				title,
+				message,
+				positiveButtonText,
+				negativeButtonText,
+				pIsEndActivity,
+				pRetryAction);
+	}
+
+	@Override
+	public void showNetworkProgress() {
 		UtilsDialog.showNetworkProgressDialog(this.getActivity(), this.getString(R.string.title__dialog), this.getString(R.string.message__loading));
 	}
 
 	@Override
-	public void hideProgress() {
-		UtilsDialog.hideProgressDialog();
+	public void hideNetworkProgress() {
+		UtilsDialog.hideNetworkProgressDialog();
 	}
 
 	public boolean shouldPopBackStack() {

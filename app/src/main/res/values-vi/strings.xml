@@ -6,5 +6,8 @@
     <string name="title__dialog">Thông tin</string>
     <string name="title__dialog_error">Lỗi</string>
 
-    <string name="message__loading">D9ang tải...</string>
+    <string name="message__loading">Đang tải...</string>
+
+    <string name="error__unknown_error">Đã có lỗi xảy ra. Xử lý không thể hoàn tất.</string>
+    <string name="error__retryable_network_error">Đã có lỗi về kết nối xảy ra。\nBạn có muốn thử lại không?</string>
 </resources>

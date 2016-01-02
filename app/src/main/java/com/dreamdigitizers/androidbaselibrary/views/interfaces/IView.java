@@ -6,9 +6,10 @@ import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
 
 public interface IView {
     Context getViewContext();
-    void showMessage(int pStringResourceId);
-    void showConfirmation(int pStringResourceId, UtilsDialog.IOnDialogButtonClickListener pListener);
-    void showError(int pStringResourceId);
-    void showProgress();
-    void hideProgress();
+    void showMessage(final int pStringResourceId);
+    void showConfirmation(final int pStringResourceId, final UtilsDialog.IOnDialogButtonClickListener pListener);
+    void showError(final int pStringResourceId);
+    public void showRetryableError(final int pStringResourceId, final boolean pIsEndActivity, final UtilsDialog.IRetryAction pRetryAction);
+    void showNetworkProgress();
+    void hideNetworkProgress();
 }

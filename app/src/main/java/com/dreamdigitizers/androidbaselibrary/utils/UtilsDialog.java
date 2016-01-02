@@ -93,7 +93,75 @@ public class UtilsDialog {
 					String pNegativeButtonText) {
 			}
 		};
-		UtilsDialog.showDialog(pActivity, pTitle, pMessage, false, pButtonText, null, dialogButtonClickListener);
+		UtilsDialog.showDialog(
+				pActivity,
+				pTitle,
+				pMessage,
+				false,
+				pButtonText,
+				null,
+				dialogButtonClickListener);
+	}
+
+	public static void showRetryableErrorDialog(
+			final Activity pActivity,
+			final String pTitle,
+			final String pMessage,
+			final String pPositiveButtonText,
+			final String pNegativeButtonText,
+			final IRetryAction pRetryAction) {
+		UtilsDialog.showRetryableErrorDialog(
+				pActivity,
+				pTitle,
+				pMessage,
+				pPositiveButtonText,
+				pNegativeButtonText,
+				false,
+				pRetryAction);
+	}
+
+	public static void showRetryableErrorDialog(
+			final Activity pActivity,
+			final String pTitle,
+			final String pMessage,
+			final String pPositiveButtonText,
+			final String pNegativeButtonText,
+			final boolean pIsEndActivity,
+			final IRetryAction pRetryAction) {
+		IOnDialogButtonClickListener dialogButtonClickListener = new IOnDialogButtonClickListener() {
+			@Override
+			public void onPositiveButtonClick(
+					Activity pActivity,
+					String pTitle,
+					String pMessage,
+					boolean pIsTwoButton,
+					String pPositiveButtonText,
+					String pNegativeButtonText) {
+				if (pIsEndActivity) {
+					pActivity.finish();
+				} else if(pRetryAction != null) {
+					pRetryAction.retry();
+				}
+			}
+
+			@Override
+			public void onNegativeButtonClick(
+					Activity pActivity,
+					String pTitle, String pMessage,
+					boolean pIsTwoButton,
+					String pPositiveButtonText,
+					String pNegativeButtonText) {
+
+			}
+		};
+		UtilsDialog.showDialog(
+				pActivity,
+				pTitle,
+				pMessage,
+				true,
+				pPositiveButtonText,
+				pNegativeButtonText,
+				dialogButtonClickListener);
 	}
 
 	public static void showDatePickerDialog(
@@ -261,6 +329,10 @@ public class UtilsDialog {
 				final String pNegativeButtonText);
 	}
 
+	public interface IRetryAction {
+		void retry();
+	}
+
 	public interface IOnDatePickerDialogEventListener {
 		void onDateSet(final int pYear, final int pMonthOfYear, final int pDayOfMonth, final Activity pActivity, final String pCancelButtonText);
 		void onCancel(final Activity pActivity, final String pCancelButtonText);
@@ -272,13 +344,14 @@ public class UtilsDialog {
 	}
 
 	public interface IOnProgressDialogCancelButtonClickListener {
-		void onCancelButtonClick(final Activity pActivity,
-								 final int pStyle,
-								 final String pTitle,
-								 final String pMessage,
-								 final String pCancelButtonText,
-								 final boolean pIsCancelable,
-								 final boolean pIsCanceledOnTouchOutside,
-								 final boolean pIndeterminate);
+		void onCancelButtonClick(
+				final Activity pActivity,
+				final int pStyle,
+				final String pTitle,
+				final String pMessage,
+				final String pCancelButtonText,
+				final boolean pIsCancelable,
+				final boolean pIsCanceledOnTouchOutside,
+				final boolean pIndeterminate);
 	}
 }

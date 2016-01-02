@@ -8,6 +8,10 @@ import java.lang.ref.WeakReference;
 public abstract class Presenter<V extends IView> implements IPresenter {
     private WeakReference<V> mView;
 
+    @Override
+    public void dispose() {
+    }
+
     public Presenter(V pView) {
         this.mView = new WeakReference(pView);
     }
