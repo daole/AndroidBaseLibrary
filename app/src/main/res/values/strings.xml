@@ -5,7 +5,9 @@
     <string name="title__dialog">Message</string>
     <string name="title__dialog_error">Error</string>
 
-    <string name="message__loading">Loading...</string>
+    <string name="message__loading">Loading %s</string>
+    <string name="message__playing">Playing %s</string>
+    <string name="message__loading...">Loading...</string>
 
     <string name="error__unknown_error">An error has occurred. The operation could not be completed.</string>
     <string name="error__retryable_network_error">A network-related error has occurred.\nDo you want to try again?</string>

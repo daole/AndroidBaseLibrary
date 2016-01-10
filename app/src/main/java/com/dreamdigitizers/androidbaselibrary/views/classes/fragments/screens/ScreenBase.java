@@ -77,6 +77,11 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 	}
 
 	@Override
+	public Object getViewSystemService(String pName) {
+		return this.getContext().getSystemService(pName);
+	}
+
+	@Override
 	public void showMessage(final int pStringResourceId) {
 		Toast.makeText(this.getActivity(), pStringResourceId, Toast.LENGTH_SHORT).show();
 	}
@@ -116,7 +121,7 @@ public abstract class ScreenBase<P extends IPresenter> extends FragmentBase impl
 
 	@Override
 	public void showNetworkProgress() {
-		UtilsDialog.showNetworkProgressDialog(this.getActivity(), this.getString(R.string.title__dialog), this.getString(R.string.message__loading));
+		UtilsDialog.showNetworkProgressDialog(this.getActivity(), this.getString(R.string.title__dialog), this.getString(R.string.message__loading___));
 	}
 
 	@Override

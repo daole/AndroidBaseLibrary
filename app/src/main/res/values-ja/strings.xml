@@ -6,7 +6,9 @@
     <string name="title__dialog">メッセージ</string>
     <string name="title__dialog_error">エラー</string>
 
-    <string name="message__loading">ローディング。。。</string>
+    <string name="message__loading">%sをィングしている</string>
+    <string name="message__playing">%sを再生している</string>
+    <string name="message__loading...">ローディング。。。</string>
 
     <string name="error__unknown_error">エラーが発生しました。処理が終わりませんでした。</string>
     <string name="error__retryable_network_error">ネットワークエラーが発生しました。\nリトライしますか？</string>

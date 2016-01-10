@@ -6,6 +6,7 @@ import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
 
 public interface IView {
     Context getViewContext();
+    Object getViewSystemService(String pName);
     void showMessage(final int pStringResourceId);
     void showConfirmation(final int pStringResourceId, final UtilsDialog.IOnDialogButtonClickListener pListener);
     void showError(final int pStringResourceId);
