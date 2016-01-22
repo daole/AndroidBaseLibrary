@@ -1,654 +1,448 @@
 package com.dreamdigitizers.androidbaselibrary.views.classes.services;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.net.wifi.WifiManager;
-import android.support.v4.media.MediaMetadataCompat;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
+import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
-import com.dreamdigitizers.androidbaselibrary.R;
-import com.dreamdigitizers.androidbaselibrary.utils.UtilsMediaPlayer;
+import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.IPlayback;
+import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.LocalPlayback;
+import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.MediaPlayerNotificationReceiver;
 
-public abstract class ServiceMediaPlayer extends Service implements AudioManager.OnAudioFocusChangeListener, UtilsMediaPlayer.CustomMediaPlayer.IOnMediaPlayerActionResultListener {
-    protected static final String TAG__WIFI_LOCK = "UtilsMediaPlayer.WifiLock";
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
-    protected static final int NOTIFICATION_ID = 1;
+public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat implements IPlayback.ICallback {
+    protected static final float PLAYBACK_SPEED = 1.0f;
+    protected static final int STOP_DELAY = 30000;
     protected static final int REQUEST_CODE = 0;
 
-    protected static final int STATE__PREPARING = 0;
-    protected static final int STATE__PLAYING = 1;
-    protected static final int STATE__PAUSED = 2;
-    protected static final int STATE__STOPPED = 3;
-
-    protected static final int AUDIO_FOCUS__NO_FOCUS_NO_DUCK = 0;
-    protected static final int AUDIO_FOCUS__NO_FOCUS_CAN_DUCK = 1;
-    protected static final int AUDIO_FOCUS__FOCUSED = 2;
-
-    public static final float VOLUME__DUCK = 0.1f;
-    public static final float VOLUME__LOUD = 1.0f;
-
-    public static final String ACTION__TOGGLE_PLAYBACK = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.TOGGLE_PLAYBACK";
-    public static final String ACTION__PLAY = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PLAY";
-    public static final String ACTION__PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PAUSE";
-    public static final String ACTION__STOP = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.STOP";
-    public static final String ACTION__SKIP_TO_PREVIOUS = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_PREVIOUS";
-    public static final String ACTION__SKIP_TO_NEXT = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_NEXT";
-    public static final String ACTION__REWIND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.REWIND";
-    public static final String ACTION__FAST_FORWARD = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.FAST_FORWARD";
-    //public static final String ACTION__URL = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.URL";
-
-    private int mState;
-    private int mAudioFocus;
-    private Track mCurrentTrack;
-    private UtilsMediaPlayer mUtilsMediaPlayer;
+    private List<MediaSessionCompat.QueueItem> mPlayingQueue;
+    private DelayedStopHandler mDelayedStopHandler;
+    private MediaPlayerNotificationReceiver mMediaPlayerNotificationReceiver;
+    private IPlayback mPlayback;
     private MediaSessionCompat mMediaSession;
 
-    private WifiManager.WifiLock mWifiLock;
-    private AudioManager mAudioManager;
-    private NotificationManager mNotificationManager;
-    private ComponentName mMediaButtonReceiverComponent;
-    private PendingIntent mMediaPendingIntent;
+    private MediaButtonReceiver mMediaButtonReceiver;
+    private IntentFilter mMediaButtonIntentFilter;
 
-    private PendingIntent mPlayPendingIntent;
-    private PendingIntent mPausePendingIntent;
-    private PendingIntent mStopPendingIntent;
-    private PendingIntent mSkipToPreviousPendingIntent;
-    private PendingIntent mSkipToNextPendingIntent;
-    private PendingIntent mRewindPendingIntent;
-    private PendingIntent mFastForwardPendingIntent;
+    private int mCurrentIndexOnQueue;
+    private boolean mIsStarted;
+
+    private boolean mIsMediaButtonReceiverRegistered;
 
     @Override
     public void onCreate() {
-        this.mState = ServiceMediaPlayer.STATE__STOPPED;
-        this.mAudioFocus = ServiceMediaPlayer.AUDIO_FOCUS__NO_FOCUS_NO_DUCK;
+        super.onCreate();
+        this.mPlayingQueue = new ArrayList<>();
+        this.mDelayedStopHandler = new DelayedStopHandler(this);
+        this.mMediaPlayerNotificationReceiver = this.createMediaPlayerNotificationReceiver();
+        this.mMediaButtonReceiver = new MediaButtonReceiver();
+        this.mMediaButtonIntentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
 
-        this.mUtilsMediaPlayer = new UtilsMediaPlayer(this);
-        this.mWifiLock = ((WifiManager) this.getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, ServiceMediaPlayer.TAG__WIFI_LOCK);
-        this.mAudioManager = (AudioManager) this.getSystemService(AUDIO_SERVICE);
-        this.mNotificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        this.mPlayback = this.createPlayback();
+        this.mPlayback.setState(PlaybackStateCompat.STATE_NONE);
+        this.mPlayback.setCallback(this);
+        //this.mPlayback.start();
+
         this.buildMediaSession();
-        this.buildSupportedPendingIntents();
-        this.initialize();
+        this.updatePlaybackState(null);
     }
 
     @Override
     public int onStartCommand(Intent pIntent, int pFlags, int pStartId) {
-        String action = pIntent.getAction();
-        this.processAction(action);
-        return Service.START_NOT_STICKY;
+        /*if (pIntent != null) {
+            String action = pIntent.getAction();
+            if (ServiceMediaPlayer.ACTION__MEDIA_COMMAND.equals(action)) {
+                String command = pIntent.getStringExtra(ServiceMediaPlayer.COMMAND__NAME);
+                switch (command) {
+                    case ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS:
+                        this.processSkipToPreviousRequest();
+                        break;
+                    case ServiceMediaPlayer.COMMAND__REWIND:
+                        //this.handleRewindRequest();
+                        break;
+                    case ServiceMediaPlayer.COMMAND__PLAY:
+                        this.processPlayRequest();
+                        break;
+                    case ServiceMediaPlayer.COMMAND__PAUSE:
+                        this.processPauseRequest();
+                        break;
+                    case ServiceMediaPlayer.COMMAND__STOP:
+                        this.processStopRequest(null);
+                        break;
+                    case ServiceMediaPlayer.COMMAND__FAST_FORWARD:
+                        //this.handleFastForwardRequest();
+                        break;
+                    case ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT:
+                        this.processSkipToNextRequest();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }*/
+
+        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        return ServiceMediaPlayer.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        this.mState = ServiceMediaPlayer.STATE__STOPPED;
-        //this.releaseResources(true);
-        this.dispose();
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer pMediaPlayer) {
-        this.mState = ServiceMediaPlayer.STATE__PLAYING;
-        //this.updateNotification(String.format(this.getString(R.string.message__playing), this.mCurrentTrack.getTitle()));
-        this.adaptMediaPlayer();
-        this.publishState(true);
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer pMediaPlayer) {
-        //this.playTrack();
-    }
-
-    @Override
-    public boolean onError(MediaPlayer pMediaPlayer, int pWhat, int pExtra) {
-        this.mState = ServiceMediaPlayer.STATE__STOPPED;
-        this.releaseResources(true);
-        return true;
-    }
-
-    @Override
-    public void onAudioFocusChange(int pFocusChange) {
-        switch (pFocusChange) {
-            case AudioManager.AUDIOFOCUS_GAIN:
-                this.gainedAudioFocus();
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS:
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                this.lostAudioFocus(false);
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                this.lostAudioFocus(true);
-                break;
-            default:
-                break;
-        }
-    }
-
-    protected void buildMediaSession() {
-        this.mMediaButtonReceiverComponent = new ComponentName(this, MediaButtonReceiver.class);
-        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        mediaButtonIntent.setComponent(this.mMediaButtonReceiverComponent);
-        this.mMediaPendingIntent = PendingIntent.getBroadcast(this, ServiceMediaPlayer.REQUEST_CODE, mediaButtonIntent, 0);
-
-        this.mMediaSession = new MediaSessionCompat(this, this.getClass().getName(), this.mMediaButtonReceiverComponent, this.mMediaPendingIntent);
-        this.mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        this.mMediaSession.setActive(true);
-        this.mMediaSession.setCallback(new MediaSessionCompat.Callback() {
-            @Override
-            public boolean onMediaButtonEvent(Intent pIntent) {
-                if (pIntent != null) {
-                    if (pIntent.getAction().equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-                        ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__PAUSE);
-                        return true;
-                    } else if (pIntent.getAction().equals(Intent.ACTION_MEDIA_BUTTON)) {
-                        KeyEvent keyEvent = (KeyEvent) pIntent.getExtras().get(Intent.EXTRA_KEY_EVENT);
-                        if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                            switch (keyEvent.getKeyCode()) {
-                                case KeyEvent.KEYCODE_HEADSETHOOK:
-                                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__TOGGLE_PLAYBACK);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_PLAY:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__PLAY);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__PAUSE);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_STOP:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__STOP);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__SKIP_TO_PREVIOUS);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_NEXT:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__SKIP_TO_NEXT);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_REWIND:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__REWIND);
-                                    return true;
-                                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                                    ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__FAST_FORWARD);
-                                    return true;
-                                default:
-                                    return false;
-                            }
-                        }
-                    }
-                }
-                return super.onMediaButtonEvent(pIntent);
-            }
-
-            @Override
-            public void onPlay() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__PLAY);
-            }
-
-            @Override
-            public void onPause() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__PAUSE);
-            }
-
-            @Override
-            public void onStop() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__STOP);
-            }
-
-            @Override
-            public void onSkipToPrevious() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__SKIP_TO_PREVIOUS);
-            }
-
-            @Override
-            public void onSkipToNext() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__SKIP_TO_NEXT);
-            }
-
-            @Override
-            public void onRewind() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__REWIND);
-            }
-
-            @Override
-            public void onFastForward() {
-                ServiceMediaPlayer.this.processAction(ServiceMediaPlayer.ACTION__FAST_FORWARD);
-            }
-        });
-    }
-
-    private void buildSupportedPendingIntents() {
-        this.mPlayPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__PLAY);
-        this.mPausePendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__PAUSE);
-        this.mStopPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__STOP);
-        this.mSkipToPreviousPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__SKIP_TO_PREVIOUS);
-        this.mSkipToNextPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__SKIP_TO_NEXT);
-        this.mRewindPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__REWIND);
-        this.mFastForwardPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.ACTION__FAST_FORWARD);
-    }
-
-    private PendingIntent buildSupportedPendingIntent(String pAction) {
-        Intent intent = new Intent(pAction);
-        return PendingIntent.getService(this, ServiceMediaPlayer.REQUEST_CODE, intent, 0);
-    }
-
-    protected void processAction(String pAction) {
-        switch (pAction) {
-            case ServiceMediaPlayer.ACTION__TOGGLE_PLAYBACK:
-                this.processTogglePlaybackRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__PLAY:
-                this.processPlayRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__PAUSE:
-                this.processPauseRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__STOP:
-                this.processStopRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__SKIP_TO_PREVIOUS:
-                this.processSkipToPreviousRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__SKIP_TO_NEXT:
-                this.processSkipToNextRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__REWIND:
-                this.processRewindRequest();
-                break;
-            case ServiceMediaPlayer.ACTION__FAST_FORWARD:
-                this.processFastForwardRequest();
-                break;
-            default:
-                break;
-        }
-    }
-
-    protected void updateMetadata(Track pTrack) {
-        MediaMetadataCompat.Builder mediaMetadataBuilder = new MediaMetadataCompat.Builder();
-        mediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, pTrack.getTitle());
-        mediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, pTrack.getArtist());
-        mediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, pTrack.getAlbum());
-        mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, pTrack.getDuration());
-        //mediaMetadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, pTrack.getAlbum());
-        this.mMediaSession.setMetadata(mediaMetadataBuilder.build());
-    }
-
-    protected void publishState(boolean pIsUpdateNotification) {
-        PlaybackStateCompat.Builder PlaybackStateBuilder = new PlaybackStateCompat.Builder();
-        PlaybackStateBuilder.setActions(this.getProtectedPlaybackActions());
-        switch (this.mState) {
-            case ServiceMediaPlayer.STATE__PLAYING:
-                PlaybackStateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1);
-                break;
-            case ServiceMediaPlayer.STATE__PREPARING:
-            case ServiceMediaPlayer.STATE__PAUSED:
-                PlaybackStateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, 0, 0);
-                break;
-            case ServiceMediaPlayer.STATE__STOPPED:
-                PlaybackStateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, 0, 0);
-                break;
-            default:
-                break;
-        }
-        this.mMediaSession.setPlaybackState(PlaybackStateBuilder.build());
-
-        if(pIsUpdateNotification) {
-            this.updateNotification(this.mCurrentTrack);
-        }
-    }
-
-    protected void createMediaPlayerIfNeeded() {
-        this.mUtilsMediaPlayer.createMediaPlayerIfNeeded(this);
-    }
-
-    protected void adaptMediaPlayer() {
-        if (this.mAudioFocus == ServiceMediaPlayer.AUDIO_FOCUS__NO_FOCUS_NO_DUCK) {
-            if (this.mUtilsMediaPlayer.isPlaying()) {
-                this.mUtilsMediaPlayer.pause();
-            }
-            return;
-        } else if (this.mAudioFocus == ServiceMediaPlayer.AUDIO_FOCUS__NO_FOCUS_CAN_DUCK) {
-            this.mUtilsMediaPlayer.setVolume(ServiceMediaPlayer.VOLUME__DUCK, ServiceMediaPlayer.VOLUME__DUCK);
-        } else {
-            this.mUtilsMediaPlayer.setVolume(ServiceMediaPlayer.VOLUME__LOUD, ServiceMediaPlayer.VOLUME__LOUD);
-        }
-        if (!this.mUtilsMediaPlayer.isPlaying()) {
-            this.mUtilsMediaPlayer.start();
-        }
-    }
-
-    protected void gainedAudioFocus() {
-        this.mAudioFocus = ServiceMediaPlayer.AUDIO_FOCUS__FOCUSED;
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING) {
-            this.adaptMediaPlayer();
-        }
-    }
-
-    protected void lostAudioFocus(boolean pIsDuck) {
-        this.mAudioFocus = pIsDuck ? ServiceMediaPlayer.AUDIO_FOCUS__NO_FOCUS_CAN_DUCK : ServiceMediaPlayer.AUDIO_FOCUS__NO_FOCUS_NO_DUCK;
-        if (this.mUtilsMediaPlayer.isPlaying()) {
-            this.adaptMediaPlayer();
-        }
-    }
-
-    protected void releaseResources(boolean pIsReleaseMediaPlayer) {
-        this.stopForeground(pIsReleaseMediaPlayer);
-
-        if(pIsReleaseMediaPlayer) {
-            //this.mUtilsMediaPlayer.reset();
-            this.mUtilsMediaPlayer.release();
-            this.releaseAudioFocus();
-        }
-
-        this.releaseWifiLock();
-    }
-
-    protected void dispose() {
-        this.stopForeground(true);
-        this.releaseAudioFocus();
-        this.releaseWifiLock();
+        this.processStopRequest(null);
+        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         this.mMediaSession.release();
-        this.mMediaSession = null;
-        this.mUtilsMediaPlayer.dispose();
-        this.mUtilsMediaPlayer = null;
-        this.mCurrentTrack = null;
-        this.mWifiLock = null;
-        this.mAudioManager = null;
-        this.mNotificationManager = null;
-        this.mMediaButtonReceiverComponent = null;
-        this.mMediaPendingIntent = null;
-        this.mPlayPendingIntent = null;
-        this.mPausePendingIntent = null;
-        this.mStopPendingIntent = null;
-        this.mSkipToPreviousPendingIntent = null;
-        this.mSkipToNextPendingIntent = null;
-        this.mRewindPendingIntent = null;
-        this.mFastForwardPendingIntent = null;
     }
 
-    protected boolean requestAudioFocus() {
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == this.mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-    }
-
-    protected boolean abandonAudioFocus() {
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED == this.mAudioManager.abandonAudioFocus(this);
-    }
-
-    protected void acquireAudioFocus() {
-        if (this.mAudioFocus != ServiceMediaPlayer.AUDIO_FOCUS__FOCUSED && this.requestAudioFocus()) {
-            this.mAudioFocus = ServiceMediaPlayer.AUDIO_FOCUS__FOCUSED;
-        }
-    }
-
-    protected void releaseAudioFocus() {
-        if (this.mAudioFocus == ServiceMediaPlayer.AUDIO_FOCUS__FOCUSED && this.abandonAudioFocus()) {
-            this.mAudioFocus = ServiceMediaPlayer.AUDIO_FOCUS__NO_FOCUS_NO_DUCK;
-        }
-    }
-
-    protected void acquireWifiLock() {
-        this.mWifiLock.acquire();
-    }
-
-    protected void releaseWifiLock() {
-        if (this.mWifiLock.isHeld()) {
-            this.mWifiLock.release();
-        }
-    }
-
-    protected void processTogglePlaybackRequest() {
-        if (this.mState == ServiceMediaPlayer.STATE__PAUSED || this.mState == ServiceMediaPlayer.STATE__STOPPED) {
+    @Override
+    public void onCompletion() {
+        this.mCurrentIndexOnQueue++;
+        if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processPauseRequest();
+            this.processStopRequest(null);
+        }
+    }
+
+    @Override
+    public void onPlaybackStatusChanged(int pState) {
+        this.updatePlaybackState(null);
+    }
+
+    @Override
+    public void onError(String pError) {
+        this.updatePlaybackState(pError);
+    }
+
+    protected void processSkipToPreviousRequest() {
+        this.mCurrentIndexOnQueue--;
+        if (this.mCurrentIndexOnQueue < 0 && this.mPlayingQueue != null) {
+            this.mCurrentIndexOnQueue = this.mPlayingQueue.size() - 1;
+        }
+        if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
+            this.processPlayRequest();
+        } else {
+            this.processStopRequest("Cannot skip");
+        }
+    }
+
+    protected void processPlayFromMediaIdRequest(String pMediaId, Bundle pExtras) {
+        this.mCurrentIndexOnQueue = this.findIndexOnQueue(pMediaId, this.mPlayingQueue);
+        if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
+            this.processPlayRequest();
+        } else {
+            this.processStopRequest("Could not find");
         }
     }
 
     protected void processPlayRequest() {
-        this.acquireAudioFocus();
+        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        if (!this.mIsStarted) {
+            this.startService(new Intent(this.getApplicationContext(), ServiceMediaPlayer.class));
+            this.mIsStarted = true;
+        }
 
-        if (this.mState == ServiceMediaPlayer.STATE__STOPPED) {
-            Track track = new Track("title", "artist", "album", "https://api.soundcloud.com/tracks/241005444/stream?client_id=3087264eee9aea2645a592f1cf600c0d", 227703);
-            this.playTrack(track);
-            //this.playTrack();
-        } else if (mState == ServiceMediaPlayer.STATE__PAUSED) {
-            this.mState = ServiceMediaPlayer.STATE__PLAYING;
-            this.adaptMediaPlayer();
-            this.publishState(true);
+        this.registerMediaButtonReceiver();
+
+        if (!this.mMediaSession.isActive()) {
+            this.mMediaSession.setActive(true);
+        }
+
+        if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
+            this.updateMetadata();
+            this.mPlayback.play(this.mPlayingQueue.get(this.mCurrentIndexOnQueue));
         }
     }
 
     protected void processPauseRequest() {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING) {
-            this.mState = ServiceMediaPlayer.STATE__PAUSED;
-            this.mUtilsMediaPlayer.pause();
-            this.releaseResources(false);
-            this.publishState(true);
-        }
+        this.mPlayback.pause();
+        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
     }
 
-    protected void processRewindRequest() {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING || this.mState == ServiceMediaPlayer.STATE__PAUSED) {
-            this.mUtilsMediaPlayer.seekTo(0);
-        }
+    protected void processStopRequest(String pError) {
+        this.mPlayback.stop(true);
+        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        this.unregisterMediaButtonReceiver();
+        this.updatePlaybackState(pError);
+        this.stopSelf();
+        this.mIsStarted = false;
     }
 
-    protected void processFastForwardRequest() {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING || this.mState == ServiceMediaPlayer.STATE__PAUSED) {
-            //this.mUtilsMediaPlayer.seekTo(0);
-        }
-    }
-
-    protected void processSkipToPreviousRequest() {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING || this.mState == ServiceMediaPlayer.STATE__PAUSED) {
-            this.acquireAudioFocus();
-            this.playTrack(null);
-        }
+    protected void processSeekToRequest(int pPosition) {
+        this.mPlayback.seekTo(pPosition);
     }
 
     protected void processSkipToNextRequest() {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING || this.mState == ServiceMediaPlayer.STATE__PAUSED) {
-            this.acquireAudioFocus();
-            this.playTrack(null);
+        this.mCurrentIndexOnQueue++;
+        if (this.mCurrentIndexOnQueue >= this.mPlayingQueue.size() && this.mPlayingQueue != null) {
+            this.mCurrentIndexOnQueue = 0;
         }
-    }
-
-    protected void processStopRequest() {
-        this.processStopRequest(false);
-    }
-
-    protected void processStopRequest(boolean pIsForced) {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING || this.mState == ServiceMediaPlayer.STATE__PAUSED || pIsForced) {
-            this.mState = ServiceMediaPlayer.STATE__STOPPED;
-            this.releaseResources(true);
-            this.publishState(false);
-            this.stopSelf();
-        }
-    }
-
-    /*
-    protected void processAddRequest(Intent pIntent) {
-        if (this.mState == ServiceMediaPlayer.STATE__PLAYING || this.mState == ServiceMediaPlayer.STATE__PAUSED || this.mState == ServiceMediaPlayer.STATE__STOPPED) {
-            this.acquireAudioFocus();
-            this.playTrack((Track) pIntent.getExtras());
-        }
-    }
-    */
-
-    protected void playTrack() {
-        this.playTrack(this.mCurrentTrack);
-    }
-
-    protected void playTrack(Track pTrack) {
-        if(pTrack == null) {
-            return;
-        }
-        this.mCurrentTrack = pTrack;
-        this.mState = ServiceMediaPlayer.STATE__STOPPED;
-        this.releaseResources(false);
-        this.createMediaPlayerIfNeeded();
-        if(!this.mUtilsMediaPlayer.setDataSource(this.mCurrentTrack.getSourcePath())) {
-            return;
-        }
-
-        this.mState = ServiceMediaPlayer.STATE__PREPARING;
-        this.setUpAsForeground(this.mCurrentTrack);
-        this.updateMetadata(this.mCurrentTrack);
-        this.publishState(false);
-        this.mUtilsMediaPlayer.prepareAsync();
-
-        if (this.isRemotePlayback()) {
-            this.acquireWifiLock();
+        if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
+            this.processPlayRequest();
         } else {
-            this.releaseWifiLock();
+            this.processStopRequest("Cannot skip");
         }
     }
 
-    protected void setUpAsForeground(Track pTrack) {
-        this.startForeground(ServiceMediaPlayer.NOTIFICATION_ID, this.createNotification(pTrack));
+    protected void updateMetadata() {
+        if (!this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
+            this.updatePlaybackState("No media metadata");
+            return;
+        }
+        MediaSessionCompat.QueueItem queueItem = this.mPlayingQueue.get(this.mCurrentIndexOnQueue);
+        //this.mMediaSession.setMetadata();
     }
 
-    protected void updateNotification(Track pTrack) {
-        this.mNotificationManager.notify(ServiceMediaPlayer.NOTIFICATION_ID, this.createNotification(pTrack));
+    protected void updatePlaybackState(String pError) {
+        long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+        if (this.mPlayback != null /*&& this.mPlayback.isConnected()*/) {
+            position = this.mPlayback.getCurrentStreamPosition();
+        }
+
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(this.getAvailableActions());
+
+        int state = mPlayback.getState();
+
+        if (pError != null) {
+            stateBuilder.setErrorMessage(pError);
+            state = PlaybackStateCompat.STATE_ERROR;
+        }
+        stateBuilder.setState(state, position, ServiceMediaPlayer.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
+
+        if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
+            MediaSessionCompat.QueueItem item = this.mPlayingQueue.get(this.mCurrentIndexOnQueue);
+            stateBuilder.setActiveQueueItemId(item.getQueueId());
+        }
+
+        this.mMediaSession.setPlaybackState(stateBuilder.build());
+
+        if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
+            this.mMediaPlayerNotificationReceiver.startNotification();
+        }
     }
 
-    protected int getState() {
-        return this.mState;
+    protected long getAvailableActions() {
+        long actions = PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID | PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH;
+        if (this.mPlayingQueue == null || this.mPlayingQueue.isEmpty()) {
+            return actions;
+        }
+        if (this.mPlayback.isPlaying()) {
+            actions |= PlaybackStateCompat.ACTION_PAUSE;
+        }
+        if (this.mCurrentIndexOnQueue > 0) {
+            actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+        }
+        if (this.mCurrentIndexOnQueue < this.mPlayingQueue.size() - 1) {
+            actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+        }
+        return actions;
     }
 
-    protected int getAudioFocus() {
-        return this.mAudioFocus;
+    protected IPlayback createPlayback() {
+        return new LocalPlayback(this, this.isOnlineStreaming());
     }
 
-    protected Track getCurrentTrack() {
-        return this.mCurrentTrack;
+    protected final boolean isIndexPlayable(int pIndex, List<MediaSessionCompat.QueueItem> pPlayingQueue) {
+        if (pPlayingQueue != null && pIndex >= 0 && pIndex < pPlayingQueue.size()) {
+             return true;
+        }
+        return  false;
     }
 
-    protected UtilsMediaPlayer getUtilsMediaPlayer() {
-        return this.mUtilsMediaPlayer;
+    protected final int findIndexOnQueue(String pMediaId, List<MediaSessionCompat.QueueItem> pPlayingQueue) {
+        if (pPlayingQueue != null) {
+            int index = 0;
+            for (MediaSessionCompat.QueueItem queueItem : pPlayingQueue) {
+                if (queueItem.getDescription().getMediaId().equals(pMediaId)) {
+                    return index;
+                }
+            }
+        }
+        return -1;
     }
 
-    protected MediaSessionCompat getMediaSession() {
+    protected final void registerMediaButtonReceiver() {
+        if (!this.mIsMediaButtonReceiverRegistered) {
+            this.registerReceiver(this.mMediaButtonReceiver, this.mMediaButtonIntentFilter);
+            this.mIsMediaButtonReceiverRegistered = true;
+        }
+    }
+
+    protected final void unregisterMediaButtonReceiver() {
+        if (this.mIsMediaButtonReceiverRegistered) {
+            this.unregisterReceiver(this.mMediaButtonReceiver);
+            this.mIsMediaButtonReceiverRegistered = false;
+        }
+    }
+
+    protected final void buildMediaSession() {
+        ComponentName mediaButtonReceiverComponent = new ComponentName(this, MediaButtonReceiver.class);
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setComponent(mediaButtonReceiverComponent);
+        PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(this, ServiceMediaPlayer.REQUEST_CODE, mediaButtonIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        this.mMediaSession = new MediaSessionCompat(this, this.getClass().getName(), mediaButtonReceiverComponent, mediaButtonPendingIntent);
+        this.mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        this.mMediaSession.setCallback(new MediaSessionCallback());
+        this.setSessionToken(this.mMediaSession.getSessionToken());
+    }
+
+    protected final int getCurrentIndexOnQueue()  {
+        return this.mCurrentIndexOnQueue;
+    }
+
+    protected final void setCurrentIndexOnQueue(int pCurrentIndexOnQueue) {
+        this.mCurrentIndexOnQueue = pCurrentIndexOnQueue;
+    }
+
+    protected final boolean isStarted() {
+        return this.mIsStarted;
+    }
+
+    protected final void setStarted(boolean pIsStarted) {
+        this.mIsStarted = pIsStarted;
+    }
+
+    protected final List<MediaSessionCompat.QueueItem> getPlayingQueue() {
+        return this.mPlayingQueue;
+    }
+
+    protected final DelayedStopHandler getDelayedStopHandler() {
+        return this.mDelayedStopHandler;
+    }
+
+    protected final MediaPlayerNotificationReceiver getMediaPlayerNotificationReceiver() {
+        return this.mMediaPlayerNotificationReceiver;
+    }
+
+    protected final IPlayback getPlayback() {
+        return this.mPlayback;
+    }
+
+    protected final MediaSessionCompat getMediaSession() {
         return this.mMediaSession;
     }
 
-    protected PendingIntent getPlayPendingIntent() {
-        return this.mPlayPendingIntent;
-    }
+    protected abstract boolean isOnlineStreaming();
+    protected abstract MediaPlayerNotificationReceiver createMediaPlayerNotificationReceiver();
 
-    protected PendingIntent getPausePendingIntent() {
-        return this.mPausePendingIntent;
-    }
+    private class DelayedStopHandler extends Handler {
+        private final WeakReference<ServiceMediaPlayer> mWeakReference;
 
-    protected PendingIntent getStopPendingIntent() {
-        return this.mStopPendingIntent;
-    }
+        private DelayedStopHandler(ServiceMediaPlayer pService) {
+            this.mWeakReference = new WeakReference<>(pService);
+        }
 
-    protected PendingIntent getSkipToPreviousPendingIntent() {
-        return this.mSkipToPreviousPendingIntent;
-    }
-
-    protected PendingIntent getSkipToNextPendingIntent() {
-        return this.mSkipToNextPendingIntent;
-    }
-
-    protected PendingIntent getRewindPendingIntent() {
-        return this.mRewindPendingIntent;
-    }
-
-    protected PendingIntent getFastForwardPendingIntent() {
-        return this.mFastForwardPendingIntent;
-    }
-
-    protected void initialize() {
-    }
-
-    protected abstract boolean isRemotePlayback();
-    protected abstract long getProtectedPlaybackActions();
-    protected abstract Notification createNotification(Track pTrack);
-
-    public static class MediaButtonReceiver extends BroadcastReceiver {
         @Override
-        public void onReceive(Context pContext, Intent pIntent) {
-            if (pIntent.getAction().equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-                pContext.startService(new Intent(ServiceMediaPlayer.ACTION__PAUSE));
-            } else if (pIntent.getAction().equals(Intent.ACTION_MEDIA_BUTTON)) {
-                KeyEvent keyEvent = (KeyEvent) pIntent.getExtras().get(Intent.EXTRA_KEY_EVENT);
-                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                    switch (keyEvent.getKeyCode()) {
-                        case KeyEvent.KEYCODE_HEADSETHOOK:
-                        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__TOGGLE_PLAYBACK));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_PLAY:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__PLAY));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__PAUSE));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_STOP:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__STOP));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__SKIP_TO_PREVIOUS));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_NEXT:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__SKIP_TO_NEXT));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_REWIND:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__REWIND));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                            pContext.startService(new Intent(ServiceMediaPlayer.ACTION__FAST_FORWARD));
-                            break;
-                        default:
-                            break;
-                    }
+        public void handleMessage(Message pMessage) {
+            ServiceMediaPlayer service = this.mWeakReference.get();
+            if (service != null && service.mPlayback != null) {
+                if (service.mPlayback.isPlaying()) {
+                    return;
                 }
+                service.stopSelf();
+                service.mIsStarted = false;
             }
         }
     }
 
-    public static class Track {
-        private String mTitle;
-        private String mArtist;
-        private String mAlbum;
-        private String mSourcePath;
-        private long mDuration;
-
-        public Track(String pTitle, String pArtist, String pAlbum, String pSourcePath, long pDuration) {
-            this.mTitle = pTitle;
-            this.mArtist = pArtist;
-            this.mAlbum = pAlbum;
-            this.mSourcePath = pSourcePath;
-            this.mDuration = pDuration;
+    private class MediaSessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onSkipToPrevious() {
+            ServiceMediaPlayer.this.processSkipToPreviousRequest();
         }
 
-        public String getTitle() {
-            return this.mTitle;
+        @Override
+        public void onPlayFromMediaId(String pMediaId, Bundle pExtras) {
+            ServiceMediaPlayer.this.processPlayFromMediaIdRequest(pMediaId, pExtras);
         }
 
-        public String getArtist() {
-            return this.mArtist;
+        @Override
+        public void onPlay() {
+            ServiceMediaPlayer.this.processPlayRequest();
         }
 
-        public String getAlbum() {
-            return this.mAlbum;
+        @Override
+        public void onPause() {
+            ServiceMediaPlayer.this.processPauseRequest();
         }
 
-        public String getSourcePath() {
-            return this.mSourcePath;
+        @Override
+        public void onStop() {
+            ServiceMediaPlayer.this.processStopRequest(null);
         }
 
-        public long getDuration() {
-            return this.mDuration;
+        @Override
+        public void onSeekTo(long pPosition) {
+            ServiceMediaPlayer.this.processSeekToRequest((int) pPosition);
+        }
+
+        @Override
+        public void onSkipToNext() {
+            ServiceMediaPlayer.this.processSkipToNextRequest();
+        }
+    }
+
+    private class MediaButtonReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context pContext, Intent pIntent) {
+            if (pIntent != null) {
+                String action = pIntent.getAction();
+                if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+                    KeyEvent keyEvent = (KeyEvent) pIntent.getExtras().get(Intent.EXTRA_KEY_EVENT);
+                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        int keyCode = keyEvent.getKeyCode();
+                        switch (keyCode) {
+                            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                                ServiceMediaPlayer.this.processSkipToPreviousRequest();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_REWIND:
+                                //ServiceMediaPlayer.this.processRewindRequest();
+                                break;
+                            case KeyEvent.KEYCODE_HEADSETHOOK:
+                            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                                if (ServiceMediaPlayer.this.mPlayback.getState() == PlaybackStateCompat.STATE_PAUSED) {
+                                    ServiceMediaPlayer.this.processPlayRequest();
+                                } else {
+                                    ServiceMediaPlayer.this.processPauseRequest();
+                                }
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_PLAY:
+                                ServiceMediaPlayer.this.processPlayRequest();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                                ServiceMediaPlayer.this.processPauseRequest();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_STOP:
+                                ServiceMediaPlayer.this.processStopRequest(null);
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                                //ServiceMediaPlayer.this.processFastForwardRequest();
+                                break;
+                            case KeyEvent.KEYCODE_MEDIA_NEXT:
+                                ServiceMediaPlayer.this.processSkipToNextRequest();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
         }
     }
 }

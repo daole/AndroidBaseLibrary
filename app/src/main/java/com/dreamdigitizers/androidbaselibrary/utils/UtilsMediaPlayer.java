@@ -232,6 +232,10 @@ public class UtilsMediaPlayer {
         return result;
     }
 
+    public boolean isMediaPlayerCreated() {
+        return this.mMediaPlayer != null ? true : false;
+    }
+
     public boolean isPlaying() {
         if (this.mMediaPlayer != null) {
             int currentState = this.mMediaPlayer.getCurrentState();
@@ -312,7 +316,10 @@ public class UtilsMediaPlayer {
     }
 
     public static class CustomMediaPlayer extends MediaPlayer
-            implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
+            implements MediaPlayer.OnPreparedListener,
+            MediaPlayer.OnSeekCompleteListener,
+            MediaPlayer.OnCompletionListener,
+            MediaPlayer.OnErrorListener {
         public static final int MEDIA_PLAYER_STATE__ERROR = -1;
         public static final int MEDIA_PLAYER_STATE__IDLE = 0;
         public static final int MEDIA_PLAYER_STATE__INITIALIZED = 1;
@@ -417,7 +424,7 @@ public class UtilsMediaPlayer {
         public void onPrepared(MediaPlayer pMediaPlayer) {
             this.mCurrentState = CustomMediaPlayer.MEDIA_PLAYER_STATE__PREPARED;
             if (this.mListener != null) {
-                this.mListener.onPrepared(pMediaPlayer);
+                this.mListener.onPrepared(this);
             }
         }
 
@@ -425,7 +432,14 @@ public class UtilsMediaPlayer {
         public void onCompletion(MediaPlayer pMediaPlayer) {
             this.mCurrentState = CustomMediaPlayer.MEDIA_PLAYER_STATE__PLAYBACK_COMPLETED;
             if (this.mListener != null) {
-                this.mListener.onCompletion(pMediaPlayer);
+                this.mListener.onCompletion(this);
+            }
+        }
+
+        @Override
+        public void onSeekComplete(MediaPlayer pMediaPlayer) {
+            if (this.mListener != null) {
+                this.mListener.onSeekComplete(this);
             }
         }
 
@@ -433,7 +447,7 @@ public class UtilsMediaPlayer {
         public boolean onError(MediaPlayer pMediaPlayer, int pWhat, int pExtra) {
             this.mCurrentState = CustomMediaPlayer.MEDIA_PLAYER_STATE__ERROR;
             if (this.mListener != null) {
-                return this.mListener.onError(pMediaPlayer, pWhat, pExtra);
+                return this.mListener.onError(this, pWhat, pExtra);
             }
             return false;
         }
@@ -447,9 +461,10 @@ public class UtilsMediaPlayer {
         }
 
         public interface IOnMediaPlayerActionResultListener {
-            void onPrepared(MediaPlayer pMediaPlayer);
-            void onCompletion(MediaPlayer pMediaPlayer);
-            boolean onError(MediaPlayer pMediaPlayer, int pWhat, int pExtra);
+            void onPrepared(CustomMediaPlayer pMediaPlayer);
+            void onSeekComplete(CustomMediaPlayer pMediaPlayer);
+            void onCompletion(CustomMediaPlayer pMediaPlayer);
+            boolean onError(CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra);
         }
     }
 }

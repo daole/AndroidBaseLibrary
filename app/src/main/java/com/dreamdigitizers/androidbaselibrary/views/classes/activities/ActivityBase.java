@@ -38,6 +38,10 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
 
     @Override
     public void onBackPressed() {
+        if (this.handleNeededBackProcess()) {
+            return;
+        }
+
         if (this.mCurrentScreen != null) {
             boolean isHandled = this.mCurrentScreen.onBackPressed();
             if(isHandled) {
@@ -162,6 +166,10 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
         if (!result) {
             this.finish();
         }
+    }
+
+    protected boolean handleNeededBackProcess() {
+        return false;
     }
 
     protected void recoverInstanceState(Bundle pSavedInstanceState) {
