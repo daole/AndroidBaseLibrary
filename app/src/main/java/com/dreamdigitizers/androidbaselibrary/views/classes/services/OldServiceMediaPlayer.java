@@ -15,7 +15,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
-import com.dreamdigitizers.androidbaselibrary.utils.UtilsMediaPlayer;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsMediaPlayer;
 
 public abstract class OldServiceMediaPlayer extends Service implements AudioManager.OnAudioFocusChangeListener, UtilsMediaPlayer.CustomMediaPlayer.IOnMediaPlayerActionResultListener {
     protected static final String TAG__WIFI_LOCK = "UtilsMediaPlayer.WifiLock";

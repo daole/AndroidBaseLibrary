@@ -11,4 +11,7 @@
 
     <string name="error__unknown_error">An error has occurred. The operation could not be completed.</string>
     <string name="error__retryable_network_error">A network-related error has occurred.\nDo you want to try again?</string>
+    <string name="error__media_skip">Skip failed.</string>
+    <string name="error__media_search">No matched track.</string>
+    <string name="error__media_unplayable">Track unplayable.</string>
 </resources>

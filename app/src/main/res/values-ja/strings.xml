@@ -12,4 +12,7 @@
 
     <string name="error__unknown_error">エラーが発生しました。処理が終わりませんでした。</string>
     <string name="error__retryable_network_error">ネットワークエラーが発生しました。\nリトライしますか？</string>
+    <string name="error__media_skip">スキップが不可能。</string>
+    <string name="error__media_search">トラックが見つからない。</string>
+    <string name="error__media_unplayable">トラックが再生不可能。</string>
 </resources>

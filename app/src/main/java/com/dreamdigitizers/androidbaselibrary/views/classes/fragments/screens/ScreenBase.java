@@ -9,13 +9,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.dreamdigitizers.androidbaselibrary.R;
-import com.dreamdigitizers.androidbaselibrary.presenters.interfaces.IPresenter;
-import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
+import com.dreamdigitizers.androidbaselibrary.presenters.interfaces.IPresenterBase;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsDialog;
 import com.dreamdigitizers.androidbaselibrary.views.classes.activities.ActivityBase;
-import com.dreamdigitizers.androidbaselibrary.views.interfaces.IView;
 import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.FragmentBase;
+import com.dreamdigitizers.androidbaselibrary.views.interfaces.IViewBase;
 
-public abstract class ScreenBase<P extends IPresenter> extends FragmentBase implements IView {
+public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase implements IViewBase {
 	private static final String ERROR_MESSAGE__CONTEXT_NOT_IMPLEMENTS_INTERFACE = "Activity must implement IOnScreenActionsListener.";
 
 	protected boolean mIsRecoverable;

@@ -12,4 +12,7 @@
 
     <string name="error__unknown_error">Đã có lỗi xảy ra. Xử lý không thể hoàn tất.</string>
     <string name="error__retryable_network_error">Đã có lỗi về kết nối xảy ra。\nBạn có muốn thử lại không?</string>
+    <string name="error__media_skip">Không thể bỏ qua.</string>
+    <string name="error__media_search">Không tìm thấy track.</string>
+    <string name="error__media_unplayable">Track không chơi được</string>
 </resources>

@@ -1,11 +1,9 @@
 package com.dreamdigitizers.androidbaselibrary.views.classes.services.support;
 
-import android.support.v4.media.session.MediaSessionCompat;
-
 public interface IPlayback {
     //void start();// Unused now
 
-    void play(MediaSessionCompat.QueueItem pItem);
+    void play(CustomQueueItem pCustomQueueItem);
 
     void pause();
 

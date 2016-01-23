@@ -7,8 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.dreamdigitizers.androidbaselibrary.ApplicationBase;
 import com.dreamdigitizers.androidbaselibrary.R;
-import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.screens.ScreenBase;
 import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.FragmentBase;
+import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.screens.ScreenBase;
 
 public abstract class ActivityBase extends AppCompatActivity implements FragmentBase.IStateChecker, ScreenBase.IOnScreenActionsListener {
     protected ScreenBase mCurrentScreen;

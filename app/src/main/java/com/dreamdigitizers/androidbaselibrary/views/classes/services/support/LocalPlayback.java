@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.wifi.WifiManager;
-import android.support.v4.media.MediaDescriptionCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import com.dreamdigitizers.androidbaselibrary.utils.UtilsMediaPlayer;
-import com.dreamdigitizers.androidbaselibrary.utils.UtilsString;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsMediaPlayer;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsString;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer;
 
 public class LocalPlayback implements
@@ -66,12 +64,12 @@ public class LocalPlayback implements
     */
 
     @Override
-    public void play(MediaSessionCompat.QueueItem pQueueItem) {
+    public void play(CustomQueueItem pCustomQueueItem) {
         this.mIsPlayOnFocusGain = true;
         this.requestAudioFocus();
         this.registerAudioNoisyReceiver();
 
-        String mediaId = pQueueItem.getDescription().getMediaId();
+        String mediaId = pCustomQueueItem.getQueueItem().getDescription().getMediaId();
         boolean isQueueItemChanged = !UtilsString.equals(mediaId, this.mCurrentMediaId);
         if (isQueueItemChanged) {
             this.mCurrentPosition = 0;
@@ -87,9 +85,8 @@ public class LocalPlayback implements
             this.createMediaPlayerIfNeeded();
 
             this.mState = PlaybackStateCompat.STATE_BUFFERING;
-            MediaDescriptionCompat mediaDescription = pQueueItem.getDescription();
-            String source = mediaDescription.getMediaUri().toString();
-            boolean result = this.mUtilsMediaPlayer.setDataSource(source);
+            String streamUrl = pCustomQueueItem.getStreamUrl();
+            boolean result = this.mUtilsMediaPlayer.setDataSource(streamUrl);
             if (!result) {
                 if (this.mCallback != null) {
                     this.mCallback.onError("Can not set data source");

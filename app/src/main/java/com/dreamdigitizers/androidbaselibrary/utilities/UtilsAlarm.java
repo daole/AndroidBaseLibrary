@@ -1,4 +1,4 @@
-package com.dreamdigitizers.androidbaselibrary.utils;
+package com.dreamdigitizers.androidbaselibrary.utilities;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

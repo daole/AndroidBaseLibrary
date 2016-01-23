@@ -1,18 +1,18 @@
 package com.dreamdigitizers.androidbaselibrary.presenters.classes;
 
-import com.dreamdigitizers.androidbaselibrary.presenters.interfaces.IPresenter;
-import com.dreamdigitizers.androidbaselibrary.views.interfaces.IView;
+import com.dreamdigitizers.androidbaselibrary.presenters.interfaces.IPresenterBase;
+import com.dreamdigitizers.androidbaselibrary.views.interfaces.IViewBase;
 
 import java.lang.ref.WeakReference;
 
-public abstract class Presenter<V extends IView> implements IPresenter {
+public abstract class PresenterBase<V extends IViewBase> implements IPresenterBase {
     private WeakReference<V> mView;
 
     @Override
     public void dispose() {
     }
 
-    public Presenter(V pView) {
+    public PresenterBase(V pView) {
         this.mView = new WeakReference(pView);
     }
 

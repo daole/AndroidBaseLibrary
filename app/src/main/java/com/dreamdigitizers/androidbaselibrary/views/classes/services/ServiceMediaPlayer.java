@@ -11,10 +11,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
+import com.dreamdigitizers.androidbaselibrary.R;
+import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.CustomQueueItem;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.IPlayback;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.LocalPlayback;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.MediaPlayerNotificationReceiver;
@@ -28,7 +31,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     protected static final int STOP_DELAY = 30000;
     protected static final int REQUEST_CODE = 0;
 
-    private List<MediaSessionCompat.QueueItem> mPlayingQueue;
+    private List<CustomQueueItem> mPlayingQueue;
     private DelayedStopHandler mDelayedStopHandler;
     private MediaPlayerNotificationReceiver mMediaPlayerNotificationReceiver;
     private IPlayback mPlayback;
@@ -134,7 +137,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest("Cannot skip");
+            this.processStopRequest(this.getString(R.string.error__media_skip));
         }
     }
 
@@ -143,7 +146,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest("Could not find");
+            this.processStopRequest(this.getString(R.string.error__media_search));
         }
     }
 
@@ -194,17 +197,26 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest("Cannot skip");
+            this.processStopRequest(this.getString(R.string.error__media_skip));
         }
     }
 
     protected void updateMetadata() {
         if (!this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
-            this.updatePlaybackState("No media metadata");
+            this.updatePlaybackState(this.getString(R.string.error__media_unplayable));
             return;
         }
-        MediaSessionCompat.QueueItem queueItem = this.mPlayingQueue.get(this.mCurrentIndexOnQueue);
-        //this.mMediaSession.setMetadata();
+
+        CustomQueueItem customQueueItem = this.mPlayingQueue.get(this.mCurrentIndexOnQueue);
+        MediaMetadataCompat mediaMetadata = customQueueItem.getMediaMetadata();
+        this.mMediaSession.setMetadata(mediaMetadata);
+
+        if (mediaMetadata.getDescription().getIconBitmap() == null && mediaMetadata.getDescription().getIconUri() != null) {
+            this.fetchArt(customQueueItem);
+        }
+    }
+
+    protected void fetchArt(CustomQueueItem pCustomQueueItem) {
     }
 
     protected void updatePlaybackState(String pError) {
@@ -225,8 +237,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         stateBuilder.setState(state, position, ServiceMediaPlayer.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
 
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
-            MediaSessionCompat.QueueItem item = this.mPlayingQueue.get(this.mCurrentIndexOnQueue);
-            stateBuilder.setActiveQueueItemId(item.getQueueId());
+            MediaSessionCompat.QueueItem queueItem = this.mPlayingQueue.get(this.mCurrentIndexOnQueue).getQueueItem();
+            stateBuilder.setActiveQueueItemId(queueItem.getQueueId());
         }
 
         this.mMediaSession.setPlaybackState(stateBuilder.build());
@@ -257,18 +269,18 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         return new LocalPlayback(this, this.isOnlineStreaming());
     }
 
-    protected final boolean isIndexPlayable(int pIndex, List<MediaSessionCompat.QueueItem> pPlayingQueue) {
+    protected final boolean isIndexPlayable(int pIndex, List<CustomQueueItem> pPlayingQueue) {
         if (pPlayingQueue != null && pIndex >= 0 && pIndex < pPlayingQueue.size()) {
              return true;
         }
         return  false;
     }
 
-    protected final int findIndexOnQueue(String pMediaId, List<MediaSessionCompat.QueueItem> pPlayingQueue) {
+    protected final int findIndexOnQueue(String pMediaId, List<CustomQueueItem> pPlayingQueue) {
         if (pPlayingQueue != null) {
             int index = 0;
-            for (MediaSessionCompat.QueueItem queueItem : pPlayingQueue) {
-                if (queueItem.getDescription().getMediaId().equals(pMediaId)) {
+            for (CustomQueueItem customQueueItem : pPlayingQueue) {
+                if (customQueueItem.getQueueItem().getDescription().getMediaId().equals(pMediaId)) {
                     return index;
                 }
             }
@@ -318,8 +330,12 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.mIsStarted = pIsStarted;
     }
 
-    protected final List<MediaSessionCompat.QueueItem> getPlayingQueue() {
+    protected final List<CustomQueueItem> getPlayingQueue() {
         return this.mPlayingQueue;
+    }
+
+    protected final void setPlayingQueue(List<CustomQueueItem> pPlayingQueue) {
+        this.mPlayingQueue = pPlayingQueue;
     }
 
     protected final DelayedStopHandler getDelayedStopHandler() {

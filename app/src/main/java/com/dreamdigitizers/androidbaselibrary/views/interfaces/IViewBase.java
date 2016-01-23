@@ -2,9 +2,9 @@ package com.dreamdigitizers.androidbaselibrary.views.interfaces;
 
 import android.content.Context;
 
-import com.dreamdigitizers.androidbaselibrary.utils.UtilsDialog;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsDialog;
 
-public interface IView {
+public interface IViewBase {
     Context getViewContext();
     Object getViewSystemService(String pName);
     void showMessage(final int pStringResourceId);

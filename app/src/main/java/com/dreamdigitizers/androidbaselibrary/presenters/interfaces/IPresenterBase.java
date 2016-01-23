@@ -1,5 +1,5 @@
 package com.dreamdigitizers.androidbaselibrary.presenters.interfaces;
 
-public interface IPresenter {
+public interface IPresenterBase {
     void dispose();
 }
