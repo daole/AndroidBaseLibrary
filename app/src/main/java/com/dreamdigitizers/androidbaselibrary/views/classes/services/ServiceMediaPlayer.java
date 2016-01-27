@@ -48,6 +48,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     @Override
     public void onCreate() {
         super.onCreate();
+        this.buildMediaSession();
+
         this.mPlayingQueue = new ArrayList<>();
         this.mDelayedStopHandler = new DelayedStopHandler(this);
         this.mMediaPlayerNotificationReceiver = this.createMediaPlayerNotificationReceiver();
@@ -59,7 +61,6 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.mPlayback.setCallback(this);
         //this.mPlayback.start();
 
-        this.buildMediaSession();
         this.updatePlaybackState(null);
     }
 
@@ -220,13 +221,15 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     }
 
     protected void updatePlaybackState(String pError) {
+        /*
         long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
-        if (this.mPlayback != null /*&& this.mPlayback.isConnected()*/) {
+        if (this.mPlayback != null && this.mPlayback.isConnected()) {
             position = this.mPlayback.getCurrentStreamPosition();
         }
+        */
+        long position = this.mPlayback.getCurrentStreamPosition();
 
-        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
-                .setActions(this.getAvailableActions());
+        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder().setActions(this.getAvailableActions());
 
         int state = mPlayback.getState();
 
