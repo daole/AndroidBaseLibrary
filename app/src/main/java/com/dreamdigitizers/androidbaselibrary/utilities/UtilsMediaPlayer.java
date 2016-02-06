@@ -337,6 +337,7 @@ public class UtilsMediaPlayer {
 
         public CustomMediaPlayer() {
             this.setOnPreparedListener(this);
+            this.setOnSeekCompleteListener(this);
             this.setOnCompletionListener(this);
             this.setOnErrorListener(this);
             this.mCurrentState = CustomMediaPlayer.MEDIA_PLAYER_STATE__IDLE;

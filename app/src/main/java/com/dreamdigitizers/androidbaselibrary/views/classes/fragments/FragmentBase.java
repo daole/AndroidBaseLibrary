@@ -58,9 +58,12 @@ public abstract class FragmentBase extends Fragment {
     final public void onCreateOptionsMenu(Menu pMenu, MenuInflater pInflater) {
         if (!this.mStateChecker.isBeingCovered(this)) {
             this.createOptionsMenu(pMenu, pInflater);
-            ActionBar actionBar = this.getActionBar();
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setTitle(this.getTitle());
+            int titleStringId = this.getTitle();
+            if (titleStringId > 0) {
+                ActionBar actionBar = this.getActionBar();
+                actionBar.setDisplayShowTitleEnabled(true);
+                actionBar.setTitle(titleStringId);
+            }
         }
     }
 

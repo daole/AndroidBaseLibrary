@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Container">
+    </style>
+
+    <style name="Container.Full" parent="Container">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="Container.Full.Padding" parent="Container.Full">
+        <item name="android:padding">@dimen/padding</item>
+    </style>
+
+    <style name="Container.Full.PaddingVertical" parent="Container.Full">
+        <item name="android:paddingTop">@dimen/padding</item>
+        <item name="android:paddingBottom">@dimen/padding</item>
+    </style>
+
+    <style name="Container.Full.PaddingHorizontal" parent="Container.Full">
+        <item name="android:paddingLeft">@dimen/padding</item>
+        <item name="android:paddingRight">@dimen/padding</item>
+    </style>
+
+    <style name="Container.Full.OrientationVertical" parent="Container.Full">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Container.Full.OrientationHorizontal" parent="Container">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="Container.WrapContent" parent="Container">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="Container.WrapContent.Horizontal" parent="Container.WrapContent">
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical" parent="Container.WrapContent">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical.Row" parent="Container.WrapContent.Vertical">
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical.Row.Padding" parent="Container.WrapContent.Vertical.Row">
+        <item name="android:padding">@dimen/padding</item>
+    </style>
+
+    <style name="Container.WrapContent.Horizontal.OrientationVertical" parent="Container.WrapContent.Horizontal">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Container.WrapContent.Horizontal.OrientationVertical.Padding" parent="Container.WrapContent.Horizontal.OrientationVertical">
+        <item name="android:padding">@dimen/padding</item>
+    </style>
+
+    <style name="Container.WrapContent.Horizontal.OrientationHorizontal" parent="Container.WrapContent.Horizontal">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="Container.WrapContent.Horizontal.OrientationHorizontal.Padding" parent="Container.WrapContent.Horizontal.OrientationHorizontal">
+        <item name="android:padding">@dimen/padding</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical.OrientationVertical" parent="Container.WrapContent.Vertical">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical.OrientationVertical.Padding" parent="Container.WrapContent.Vertical.OrientationVertical">
+        <item name="android:padding">@dimen/padding</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical.OrientationHorizontal" parent="Container.WrapContent.Vertical">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="Container.WrapContent.ProgressDialog" parent="Container.WrapContent">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="Container.WrapContent.Vertical.OrientationHorizontal.Padding" parent="Container.WrapContent.Vertical.OrientationHorizontal">
+        <item name="android:padding">@dimen/padding</item>
+    </style>
+
+    <style name="AppBarLayout" parent="Container.WrapContent.Vertical">
+        <item name="android:theme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="DrawerHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/drawer_header_height</item>
+        <item name="android:padding">@dimen/padding</item>
+        <item name="android:background">?attr/colorPrimaryDark</item>
+        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark</item>
+    </style>
+
+    <style name="Toolbar" parent="Container.WrapContent.Vertical">
+        <item name="android:minHeight">?attr/actionBarSize</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="Shadow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/shadow_height</item>
+        <item name="android:background">@drawable/toolbar_shadow</item>
+    </style>
+
+    <style name="TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+    </style>
+
+    <style name="ImageView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="ImageButton" parent="ImageView">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="SeekBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/margin</item>
+        <item name="android:layout_marginRight">@dimen/margin</item>
+    </style>
+
+    <style name="ProgressBar" parent="Container.WrapContent">
+    </style>
+
+    <style name="ProgressBar.ProgressDialog" parent="ProgressBar">
+        <item name="android:layout_centerInParent">true</item>
+    </style>
+</resources>

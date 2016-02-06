@@ -115,7 +115,6 @@ public class LocalPlayback implements
             }
 
             this.releaseResources(false);
-            this.releaseAudioFocus();
         }
         this.unregisterAudioNoisyReceiver();
 
@@ -144,14 +143,14 @@ public class LocalPlayback implements
             this.mCurrentPosition = pPosition;
         } else {
             boolean isPlaying = this.mUtilsMediaPlayer.isPlaying();
-            this.mUtilsMediaPlayer.seekTo(pPosition);
-
             if (isPlaying) {
                 this.mState = PlaybackStateCompat.STATE_BUFFERING;
                 if (this.mCallback != null) {
                     this.mCallback.onPlaybackStatusChanged(this.mState);
                 }
             }
+
+            this.mUtilsMediaPlayer.seekTo(pPosition);
         }
     }
 
@@ -351,7 +350,7 @@ public class LocalPlayback implements
         }
     }
 
-    private class AudioNoisyReceiver extends BroadcastReceiver {
+    public class AudioNoisyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context pContext, Intent pIntent) {
             String action = pIntent.getAction();

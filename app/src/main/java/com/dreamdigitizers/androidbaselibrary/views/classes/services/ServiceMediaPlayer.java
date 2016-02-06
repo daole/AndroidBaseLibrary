@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +16,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
 import com.dreamdigitizers.androidbaselibrary.R;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsString;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.CustomQueueItem;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.IPlayback;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.LocalPlayback;
@@ -27,6 +27,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat implements IPlayback.ICallback {
+    public static final String ACTION__MEDIA_COMMAND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.ACTION__MEDIA_COMMAND";
+    public static final String COMMAND__NAME = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.COMMAND__NAME";
+    public static final String COMMAND__SKIP_TO_PREVIOUS = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_PREVIOUS";
+    public static final String COMMAND__REWIND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.REWIND";
+    public static final String COMMAND__TOGGLE_PLAYBACK = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.TOGGLE_PLAYBACK";
+    public static final String COMMAND__PLAY_PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PLAY_PAUSE";
+    public static final String COMMAND__PLAY = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PLAY";
+    public static final String COMMAND__PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PAUSE";
+    public static final String COMMAND__STOP = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.STOP";
+    public static final String COMMAND__FAST_FORWARD = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.FAST_FORWARD";
+    public static final String COMMAND__SKIP_TO_NEXT = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_NEXT";
+
     protected static final float PLAYBACK_SPEED = 1.0f;
     protected static final int STOP_DELAY = 30000;
     protected static final int REQUEST_CODE = 0;
@@ -37,13 +49,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     private IPlayback mPlayback;
     private MediaSessionCompat mMediaSession;
 
-    private MediaButtonReceiver mMediaButtonReceiver;
-    private IntentFilter mMediaButtonIntentFilter;
-
     private int mCurrentIndexOnQueue;
     private boolean mIsStarted;
-
-    private boolean mIsMediaButtonReceiverRegistered;
 
     @Override
     public void onCreate() {
@@ -53,8 +60,6 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.mPlayingQueue = new ArrayList<>();
         this.mDelayedStopHandler = new DelayedStopHandler(this);
         this.mMediaPlayerNotificationReceiver = this.createMediaPlayerNotificationReceiver();
-        this.mMediaButtonReceiver = new MediaButtonReceiver();
-        this.mMediaButtonIntentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
 
         this.mPlayback = this.createPlayback();
         this.mPlayback.setState(PlaybackStateCompat.STATE_NONE);
@@ -66,37 +71,42 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
 
     @Override
     public int onStartCommand(Intent pIntent, int pFlags, int pStartId) {
-        /*if (pIntent != null) {
+        if (pIntent != null) {
             String action = pIntent.getAction();
             if (ServiceMediaPlayer.ACTION__MEDIA_COMMAND.equals(action)) {
                 String command = pIntent.getStringExtra(ServiceMediaPlayer.COMMAND__NAME);
-                switch (command) {
-                    case ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS:
-                        this.processSkipToPreviousRequest();
-                        break;
-                    case ServiceMediaPlayer.COMMAND__REWIND:
-                        //this.handleRewindRequest();
-                        break;
-                    case ServiceMediaPlayer.COMMAND__PLAY:
-                        this.processPlayRequest();
-                        break;
-                    case ServiceMediaPlayer.COMMAND__PAUSE:
-                        this.processPauseRequest();
-                        break;
-                    case ServiceMediaPlayer.COMMAND__STOP:
-                        this.processStopRequest(null);
-                        break;
-                    case ServiceMediaPlayer.COMMAND__FAST_FORWARD:
-                        //this.handleFastForwardRequest();
-                        break;
-                    case ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT:
-                        this.processSkipToNextRequest();
-                        break;
-                    default:
-                        break;
+                if (!UtilsString.isEmpty(command)) {
+                    switch (command) {
+                        case ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS:
+                            this.processSkipToPreviousRequest();
+                            break;
+                        case ServiceMediaPlayer.COMMAND__REWIND:
+                            //this.handleRewindRequest();
+                            break;
+                        case ServiceMediaPlayer.COMMAND__PLAY_PAUSE:
+                            this.processPlayPauseRequest();
+                            break;
+                        case ServiceMediaPlayer.COMMAND__PLAY:
+                            this.processPlayRequest();
+                            break;
+                        case ServiceMediaPlayer.COMMAND__PAUSE:
+                            this.processPauseRequest();
+                            break;
+                        case ServiceMediaPlayer.COMMAND__STOP:
+                            this.processStopRequest(null);
+                            break;
+                        case ServiceMediaPlayer.COMMAND__FAST_FORWARD:
+                            //this.handleFastForwardRequest();
+                            break;
+                        case ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT:
+                            this.processSkipToNextRequest();
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
-        }*/
+        }
 
         this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
@@ -151,14 +161,21 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         }
     }
 
+    protected void processPlayPauseRequest() {
+        int state = this.mPlayback.getState();
+        if (state == PlaybackStateCompat.STATE_PLAYING) {
+            this.processPauseRequest();
+        } else {
+            this.processPlayRequest();
+        }
+    }
+
     protected void processPlayRequest() {
         this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         if (!this.mIsStarted) {
-            this.startService(new Intent(this.getApplicationContext(), ServiceMediaPlayer.class));
+            //this.startService(new Intent(this, ServiceMediaPlayer.class));
             this.mIsStarted = true;
         }
-
-        this.registerMediaButtonReceiver();
 
         if (!this.mMediaSession.isActive()) {
             this.mMediaSession.setActive(true);
@@ -180,7 +197,6 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.mPlayback.stop(true);
         this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
-        this.unregisterMediaButtonReceiver();
         this.updatePlaybackState(pError);
         this.stopSelf();
         this.mIsStarted = false;
@@ -259,12 +275,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.mPlayback.isPlaying()) {
             actions |= PlaybackStateCompat.ACTION_PAUSE;
         }
-        if (this.mCurrentIndexOnQueue > 0) {
-            actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
-        }
-        if (this.mCurrentIndexOnQueue < this.mPlayingQueue.size() - 1) {
-            actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
-        }
+        actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+        actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
         return actions;
     }
 
@@ -286,30 +298,17 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
                 if (customQueueItem.getQueueItem().getDescription().getMediaId().equals(pMediaId)) {
                     return index;
                 }
+                index++;
             }
         }
         return -1;
-    }
-
-    protected final void registerMediaButtonReceiver() {
-        if (!this.mIsMediaButtonReceiverRegistered) {
-            this.registerReceiver(this.mMediaButtonReceiver, this.mMediaButtonIntentFilter);
-            this.mIsMediaButtonReceiverRegistered = true;
-        }
-    }
-
-    protected final void unregisterMediaButtonReceiver() {
-        if (this.mIsMediaButtonReceiverRegistered) {
-            this.unregisterReceiver(this.mMediaButtonReceiver);
-            this.mIsMediaButtonReceiverRegistered = false;
-        }
     }
 
     protected final void buildMediaSession() {
         ComponentName mediaButtonReceiverComponent = new ComponentName(this, MediaButtonReceiver.class);
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(mediaButtonReceiverComponent);
-        PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(this, ServiceMediaPlayer.REQUEST_CODE, mediaButtonIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(this, ServiceMediaPlayer.REQUEST_CODE, mediaButtonIntent, 0);
 
         this.mMediaSession = new MediaSessionCompat(this, this.getClass().getName(), mediaButtonReceiverComponent, mediaButtonPendingIntent);
         this.mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -380,7 +379,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         }
     }
 
-    private class MediaSessionCallback extends MediaSessionCompat.Callback {
+    public class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onSkipToPrevious() {
             ServiceMediaPlayer.this.processSkipToPreviousRequest();
@@ -417,7 +416,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         }
     }
 
-    private class MediaButtonReceiver extends BroadcastReceiver {
+    public static class MediaButtonReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context pContext, Intent pIntent) {
             if (pIntent != null) {
@@ -425,39 +424,41 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
                 if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
                     KeyEvent keyEvent = (KeyEvent) pIntent.getExtras().get(Intent.EXTRA_KEY_EVENT);
                     if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                        String command = null;
                         int keyCode = keyEvent.getKeyCode();
                         switch (keyCode) {
                             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                                ServiceMediaPlayer.this.processSkipToPreviousRequest();
+                                command = ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_REWIND:
-                                //ServiceMediaPlayer.this.processRewindRequest();
+                                command = ServiceMediaPlayer.COMMAND__REWIND;
                                 break;
                             case KeyEvent.KEYCODE_HEADSETHOOK:
                             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                                if (ServiceMediaPlayer.this.mPlayback.getState() == PlaybackStateCompat.STATE_PAUSED) {
-                                    ServiceMediaPlayer.this.processPlayRequest();
-                                } else {
-                                    ServiceMediaPlayer.this.processPauseRequest();
-                                }
+                                command = ServiceMediaPlayer.COMMAND__PLAY_PAUSE;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
-                                ServiceMediaPlayer.this.processPlayRequest();
+                                command = ServiceMediaPlayer.COMMAND__PLAY;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                                ServiceMediaPlayer.this.processPauseRequest();
+                                command = ServiceMediaPlayer.COMMAND__PAUSE;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_STOP:
-                                ServiceMediaPlayer.this.processStopRequest(null);
+                                command = ServiceMediaPlayer.COMMAND__STOP;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                                //ServiceMediaPlayer.this.processFastForwardRequest();
+                                command = ServiceMediaPlayer.COMMAND__FAST_FORWARD;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_NEXT:
-                                ServiceMediaPlayer.this.processSkipToNextRequest();
+                                command = ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT;
                                 break;
                             default:
                                 break;
+                        }
+                        if (!UtilsString.isEmpty(command)) {
+                            Intent intent = new Intent(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
+                            intent.putExtra(ServiceMediaPlayer.COMMAND__NAME, command);
+                            pContext.startService(intent);
                         }
                     }
                 }

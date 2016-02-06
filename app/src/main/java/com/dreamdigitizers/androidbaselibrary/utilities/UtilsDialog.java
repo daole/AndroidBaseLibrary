@@ -6,8 +6,16 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+import android.view.WindowManager;
 import android.widget.DatePicker;
+import android.widget.ProgressBar;
 import android.widget.TimePicker;
+
+import com.dreamdigitizers.androidbaselibrary.R;
 
 import java.util.Calendar;
 
@@ -284,6 +292,16 @@ public class UtilsDialog {
 				UtilsDialog.progressDialog.setMax(UtilsDialog.MAX_INDETERMINATE);
 			}
 			UtilsDialog.progressDialog.show();
+			UtilsDialog.progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+			UtilsDialog.progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+			UtilsDialog.progressDialog.setContentView(R.layout.dialog___progress);
+
+			ProgressBar progressBar = (ProgressBar) UtilsDialog.progressDialog.findViewById(R.id.pgbProgress);
+			progressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(pActivity, R.color.color_accent), PorterDuff.Mode.SRC_IN);
+			Drawable progressDrawable = progressBar.getProgressDrawable();
+			if (progressDrawable != null) {
+				progressDrawable.setColorFilter(ContextCompat.getColor(pActivity, R.color.color_accent), PorterDuff.Mode.SRC_IN);
+			}
 		}
 	}
 	

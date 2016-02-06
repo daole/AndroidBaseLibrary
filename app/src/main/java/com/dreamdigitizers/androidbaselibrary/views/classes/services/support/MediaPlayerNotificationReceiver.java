@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,17 +26,6 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
     private static final int REQUEST_CODE__STOP = 5;
     private static final int REQUEST_CODE__FAST_FORWARD = 6;
     private static final int REQUEST_CODE__SKIP_TO_NEXT = 7;
-
-    public static final String ACTION__MEDIA_COMMAND = "com.dreamdigitizers.androidbaselibrary.ACTION__MEDIA_COMMAND";
-    public static final String COMMAND__NAME = "com.dreamdigitizers.androidbaselibrary.COMMAND__NAME";
-    public static final String COMMAND__SKIP_TO_PREVIOUS = "com.dreamdigitizers.androidbaselibrary.SKIP_TO_PREVIOUS";
-    public static final String COMMAND__REWIND = "com.dreamdigitizers.androidbaselibrary.REWIND";
-    public static final String COMMAND__TOGGLE_PLAYBACK = "com.dreamdigitizers.androidbaselibrary.TOGGLE_PLAYBACK";
-    public static final String COMMAND__PLAY = "com.dreamdigitizers.androidbaselibrary.PLAY";
-    public static final String COMMAND__PAUSE = "com.dreamdigitizers.androidbaselibrary.PAUSE";
-    public static final String COMMAND__STOP = "com.dreamdigitizers.androidbaselibrary.STOP";
-    public static final String COMMAND__FAST_FORWARD = "com.dreamdigitizers.androidbaselibrary.FAST_FORWARD";
-    public static final String COMMAND__SKIP_TO_NEXT = "com.dreamdigitizers.androidbaselibrary.SKIP_TO_NEXT";
 
     protected final NotificationManager mNotificationManager;
 
@@ -72,28 +60,28 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
     @Override
     public void onReceive(Context pContext, Intent pIntent) {
         String action = pIntent.getAction();
-        if (MediaPlayerNotificationReceiver.ACTION__MEDIA_COMMAND.equals(action)) {
-            String command = pIntent.getStringExtra(MediaPlayerNotificationReceiver.COMMAND__NAME);
+        if (ServiceMediaPlayer.ACTION__MEDIA_COMMAND.equals(action)) {
+            String command = pIntent.getStringExtra(ServiceMediaPlayer.COMMAND__NAME);
             switch (command) {
-                case MediaPlayerNotificationReceiver.COMMAND__SKIP_TO_PREVIOUS:
+                case ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS:
                     this.mTransportControls.skipToPrevious();
                     break;
-                case MediaPlayerNotificationReceiver.COMMAND__REWIND:
+                case ServiceMediaPlayer.COMMAND__REWIND:
                     this.mTransportControls.rewind();
                     break;
-                case MediaPlayerNotificationReceiver.COMMAND__PLAY:
+                case ServiceMediaPlayer.COMMAND__PLAY:
                     this.mTransportControls.play();
                     break;
-                case MediaPlayerNotificationReceiver.COMMAND__PAUSE:
+                case ServiceMediaPlayer.COMMAND__PAUSE:
                     this.mTransportControls.pause();
                     break;
-                case MediaPlayerNotificationReceiver.COMMAND__STOP:
+                case ServiceMediaPlayer.COMMAND__STOP:
                     this.mTransportControls.stop();
                     break;
-                case MediaPlayerNotificationReceiver.COMMAND__FAST_FORWARD:
+                case ServiceMediaPlayer.COMMAND__FAST_FORWARD:
                     this.mTransportControls.fastForward();
                     break;
-                case MediaPlayerNotificationReceiver.COMMAND__SKIP_TO_NEXT:
+                case ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT:
                     this.mTransportControls.skipToNext();
                     break;
                 default:
@@ -142,7 +130,7 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
             Notification notification = this.createNotification();
             if (notification != null) {
                 this.mMediaController.registerCallback(this.mMediaControllerCallback);
-                IntentFilter filter = new IntentFilter(MediaPlayerNotificationReceiver.ACTION__MEDIA_COMMAND);
+                IntentFilter filter = new IntentFilter(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
                 this.mService.registerReceiver(this, filter);
                 this.mService.startForeground(MediaPlayerNotificationReceiver.NOTIFICATION_ID, notification);
                 this.mStarted = true;
@@ -154,11 +142,8 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
         if (this.mStarted) {
             this.mStarted = false;
             this.mMediaController.unregisterCallback(this.mMediaControllerCallback);
-            //try {
             this.mNotificationManager.cancel(MediaPlayerNotificationReceiver.NOTIFICATION_ID);
             this.mService.unregisterReceiver(this);
-            //} catch (IllegalArgumentException ex) {
-            //}
             this.mService.stopForeground(true);
         }
     }
@@ -208,20 +193,20 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
     }
 
     private void buildSupportedPendingIntents() {
-        this.mSkipToPreviousPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__SKIP_TO_PREVIOUS, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_PREVIOUS);
-        this.mRewindPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__REWIND, MediaPlayerNotificationReceiver.REQUEST_CODE__REWIND);
-        this.mTogglePlaybackPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__TOGGLE_PLAYBACK, MediaPlayerNotificationReceiver.REQUEST_CODE__TOGGLE_PLAYBACK);
-        this.mPlayPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__PLAY, MediaPlayerNotificationReceiver.REQUEST_CODE__PLAY);
-        this.mPausePendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__PAUSE, MediaPlayerNotificationReceiver.REQUEST_CODE__PAUSE);
-        this.mStopPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__STOP, MediaPlayerNotificationReceiver.REQUEST_CODE__STOP);
-        this.mFastForwardPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__FAST_FORWARD, MediaPlayerNotificationReceiver.REQUEST_CODE__FAST_FORWARD);
-        this.mSkipToNextPendingIntent = this.buildSupportedPendingIntent(MediaPlayerNotificationReceiver.COMMAND__SKIP_TO_NEXT, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_NEXT);
+        this.mSkipToPreviousPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_PREVIOUS);
+        this.mRewindPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__REWIND, MediaPlayerNotificationReceiver.REQUEST_CODE__REWIND);
+        this.mTogglePlaybackPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__TOGGLE_PLAYBACK, MediaPlayerNotificationReceiver.REQUEST_CODE__TOGGLE_PLAYBACK);
+        this.mPlayPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__PLAY, MediaPlayerNotificationReceiver.REQUEST_CODE__PLAY);
+        this.mPausePendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__PAUSE, MediaPlayerNotificationReceiver.REQUEST_CODE__PAUSE);
+        this.mStopPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__STOP, MediaPlayerNotificationReceiver.REQUEST_CODE__STOP);
+        this.mFastForwardPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__FAST_FORWARD, MediaPlayerNotificationReceiver.REQUEST_CODE__FAST_FORWARD);
+        this.mSkipToNextPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_NEXT);
     }
 
     private PendingIntent buildSupportedPendingIntent(String pCommand, int pRequestCode) {
-        Intent intent = new Intent(MediaPlayerNotificationReceiver.ACTION__MEDIA_COMMAND);
-        intent.setComponent(new ComponentName(this.mService, MediaPlayerNotificationReceiver.class));
-        intent.putExtra(MediaPlayerNotificationReceiver.COMMAND__NAME, pCommand);
+        Intent intent = new Intent(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
+        intent.setPackage(this.mService.getPackageName());
+        intent.putExtra(ServiceMediaPlayer.COMMAND__NAME, pCommand);
         return PendingIntent.getBroadcast(this.mService, pRequestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
