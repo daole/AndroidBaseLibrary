@@ -165,6 +165,7 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 		return this.getResources().getConfiguration().orientation;
 	}
 
+	public abstract int getScreenId();
 	protected abstract P createPresenter();
 
 	public interface IOnScreenActionsListener {

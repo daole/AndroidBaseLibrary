@@ -17,6 +17,7 @@ import android.view.KeyEvent;
 
 import com.dreamdigitizers.androidbaselibrary.R;
 import com.dreamdigitizers.androidbaselibrary.utilities.UtilsString;
+import com.dreamdigitizers.androidbaselibrary.views.classes.activities.ActivityDummy;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.CustomQueueItem;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.IPlayback;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.LocalPlayback;
@@ -118,6 +119,13 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.processStopRequest(null);
         this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         this.mMediaSession.release();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent pRootIntent) {
+        Intent intent = new Intent(this, ActivityDummy.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(intent);
     }
 
     @Override
