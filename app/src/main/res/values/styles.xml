@@ -26,7 +26,7 @@
         <item name="android:orientation">vertical</item>
     </style>
 
-    <style name="Container.Full.OrientationHorizontal" parent="Container">
+    <style name="Container.Full.OrientationHorizontal" parent="Container.Full">
         <item name="android:orientation">horizontal</item>
     </style>
 
