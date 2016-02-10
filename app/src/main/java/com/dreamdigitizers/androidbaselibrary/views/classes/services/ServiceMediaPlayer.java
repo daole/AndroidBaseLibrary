@@ -6,8 +6,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -23,7 +21,6 @@ import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.IPl
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.LocalPlayback;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.MediaPlayerNotificationReceiver;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,11 +38,11 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     public static final String COMMAND__SKIP_TO_NEXT = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_NEXT";
 
     protected static final float PLAYBACK_SPEED = 1.0f;
-    protected static final int STOP_DELAY = 30000;
+    //protected static final int STOP_DELAY = 30000;
     protected static final int REQUEST_CODE = 0;
 
     private List<CustomQueueItem> mPlayingQueue;
-    private DelayedStopHandler mDelayedStopHandler;
+    //private DelayedStopHandler mDelayedStopHandler;
     private MediaPlayerNotificationReceiver mMediaPlayerNotificationReceiver;
     private IPlayback mPlayback;
     private MediaSessionCompat mMediaSession;
@@ -59,7 +56,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.buildMediaSession();
 
         this.mPlayingQueue = new ArrayList<>();
-        this.mDelayedStopHandler = new DelayedStopHandler(this);
+        //this.mDelayedStopHandler = new DelayedStopHandler(this);
         this.mMediaPlayerNotificationReceiver = this.createMediaPlayerNotificationReceiver();
 
         this.mPlayback = this.createPlayback();
@@ -109,15 +106,15 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
             }
         }
 
-        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
-        this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
         return ServiceMediaPlayer.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         this.processStopRequest(null);
-        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         this.mMediaSession.release();
     }
 
@@ -179,7 +176,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     }
 
     protected void processPlayRequest() {
-        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         if (!this.mIsStarted) {
             //this.startService(new Intent(this, ServiceMediaPlayer.class));
             this.mIsStarted = true;
@@ -197,14 +194,14 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
 
     protected void processPauseRequest() {
         this.mPlayback.pause();
-        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
-        this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
     }
 
     protected void processStopRequest(String pError) {
         this.mPlayback.stop(true);
-        this.mDelayedStopHandler.removeCallbacksAndMessages(null);
-        this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
+        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
         this.updatePlaybackState(pError);
         this.stopSelf();
         this.mIsStarted = false;
@@ -348,9 +345,11 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         this.mPlayingQueue = pPlayingQueue;
     }
 
+    /*
     protected final DelayedStopHandler getDelayedStopHandler() {
         return this.mDelayedStopHandler;
     }
+    */
 
     protected final MediaPlayerNotificationReceiver getMediaPlayerNotificationReceiver() {
         return this.mMediaPlayerNotificationReceiver;
@@ -367,6 +366,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     protected abstract boolean isOnlineStreaming();
     protected abstract MediaPlayerNotificationReceiver createMediaPlayerNotificationReceiver();
 
+    /*
     private class DelayedStopHandler extends Handler {
         private final WeakReference<ServiceMediaPlayer> mWeakReference;
 
@@ -386,6 +386,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
             }
         }
     }
+    */
 
     public class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override

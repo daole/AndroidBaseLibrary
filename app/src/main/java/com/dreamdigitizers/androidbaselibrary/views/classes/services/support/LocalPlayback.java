@@ -143,14 +143,13 @@ public class LocalPlayback implements
             this.mCurrentPosition = pPosition;
         } else {
             boolean isPlaying = this.mUtilsMediaPlayer.isPlaying();
+            this.mUtilsMediaPlayer.seekTo(pPosition);
             if (isPlaying) {
                 this.mState = PlaybackStateCompat.STATE_BUFFERING;
                 if (this.mCallback != null) {
                     this.mCallback.onPlaybackStatusChanged(this.mState);
                 }
             }
-
-            this.mUtilsMediaPlayer.seekTo(pPosition);
         }
     }
 
