@@ -138,7 +138,7 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
                 FragmentTransaction fragmentTransaction = this.getSupportFragmentManager().beginTransaction();
 
                 if (pIsUseAnimation) {
-                    //fragmentTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left, R.animator.slide_in_right, R.animator.slide_out_right);
+                    fragmentTransaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
                 }
 
                 fragmentTransaction.replace(this.getScreenContainerViewId(), pScreen);
