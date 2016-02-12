@@ -1,6 +1,7 @@
 package com.dreamdigitizers.androidbaselibrary.views.classes.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -30,14 +31,14 @@ public abstract class FragmentBase extends Fragment {
     public void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
 
-        Bundle extras = this.getActivity().getIntent().getExtras();
-        if (extras != null) {
-            this.handleExtras(extras);
+        Intent intent = this.getActivity().getIntent();
+        if (intent != null) {
+            this.handleIntent(intent);
         }
 
         Bundle arguments = this.getArguments();
         if (arguments != null) {
-            this.retrieveArguments(arguments);
+            this.handleArguments(arguments);
         }
 
         if (pSavedInstanceState != null) {
@@ -78,10 +79,10 @@ public abstract class FragmentBase extends Fragment {
     protected void createOptionsMenu(Menu pMenu, MenuInflater pInflater) {
     }
 
-    protected void handleExtras(Bundle pExtras) {
+    protected void handleIntent(Intent pIntent) {
     }
 
-    protected void retrieveArguments(Bundle pArguments) {
+    protected void handleArguments(Bundle pArguments) {
     }
 
     protected void recoverInstanceState(Bundle pSavedInstanceState) {
