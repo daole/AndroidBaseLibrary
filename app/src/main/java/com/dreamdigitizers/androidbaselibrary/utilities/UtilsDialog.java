@@ -297,10 +297,10 @@ public class UtilsDialog {
 			UtilsDialog.progressDialog.setContentView(R.layout.dialog___progress);
 
 			ProgressBar progressBar = (ProgressBar) UtilsDialog.progressDialog.findViewById(R.id.pgbProgress);
-			progressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(pActivity, R.color.color_accent), PorterDuff.Mode.SRC_IN);
+			progressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(pActivity, R.color.color_progress_dialog), PorterDuff.Mode.SRC_IN);
 			Drawable progressDrawable = progressBar.getProgressDrawable();
 			if (progressDrawable != null) {
-				progressDrawable.setColorFilter(ContextCompat.getColor(pActivity, R.color.color_accent), PorterDuff.Mode.SRC_IN);
+				progressDrawable.setColorFilter(ContextCompat.getColor(pActivity, R.color.color_progress_dialog), PorterDuff.Mode.SRC_IN);
 			}
 		}
 	}
