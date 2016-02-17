@@ -319,6 +319,7 @@ public class UtilsMediaPlayer {
             implements MediaPlayer.OnPreparedListener,
             MediaPlayer.OnSeekCompleteListener,
             MediaPlayer.OnCompletionListener,
+            MediaPlayer.OnInfoListener,
             MediaPlayer.OnErrorListener {
         public static final int MEDIA_PLAYER_STATE__ERROR = -1;
         public static final int MEDIA_PLAYER_STATE__IDLE = 0;
@@ -339,6 +340,7 @@ public class UtilsMediaPlayer {
             this.setOnPreparedListener(this);
             this.setOnSeekCompleteListener(this);
             this.setOnCompletionListener(this);
+            this.setOnInfoListener(this);
             this.setOnErrorListener(this);
             this.mCurrentState = CustomMediaPlayer.MEDIA_PLAYER_STATE__IDLE;
         }
@@ -445,6 +447,14 @@ public class UtilsMediaPlayer {
         }
 
         @Override
+        public boolean onInfo(MediaPlayer pMediaPlayer, int pWhat, int pExtra) {
+            if (this.mListener != null) {
+                return this.mListener.onInfo(this, pWhat, pExtra);
+            }
+            return false;
+        }
+
+        @Override
         public boolean onError(MediaPlayer pMediaPlayer, int pWhat, int pExtra) {
             this.mCurrentState = CustomMediaPlayer.MEDIA_PLAYER_STATE__ERROR;
             if (this.mListener != null) {
@@ -465,6 +475,7 @@ public class UtilsMediaPlayer {
             void onPrepared(CustomMediaPlayer pMediaPlayer);
             void onSeekComplete(CustomMediaPlayer pMediaPlayer);
             void onCompletion(CustomMediaPlayer pMediaPlayer);
+            boolean onInfo(CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra);
             boolean onError(CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra);
         }
     }

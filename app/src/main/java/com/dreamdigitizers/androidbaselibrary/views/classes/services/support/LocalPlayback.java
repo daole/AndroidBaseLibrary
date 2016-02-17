@@ -261,6 +261,25 @@ public class LocalPlayback implements
     }
 
     @Override
+    public boolean onInfo(UtilsMediaPlayer.CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra) {
+        switch (pWhat) {
+            case UtilsMediaPlayer.CustomMediaPlayer.MEDIA_INFO_BUFFERING_START:
+                if (this.mState == PlaybackStateCompat.STATE_PLAYING) {
+                    this.mState = PlaybackStateCompat.STATE_BUFFERING;
+                    this.mCallback.onPlaybackStatusChanged(this.mState);
+                }
+                break;
+            case UtilsMediaPlayer.CustomMediaPlayer.MEDIA_INFO_BUFFERING_END:
+                if (this.mState == PlaybackStateCompat.STATE_BUFFERING) {
+                    this.mState = PlaybackStateCompat.STATE_PLAYING;
+                    this.mCallback.onPlaybackStatusChanged(this.mState);
+                }
+                break;
+        }
+        return false;
+    }
+
+    @Override
     public boolean onError(UtilsMediaPlayer.CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra) {
         if (this.mCallback != null) {
             this.mCallback.onError(String.format(LocalPlayback.ERROR_MESSAGE__MEDIA_PLAYER_UNCLEAR, pWhat, pExtra));
