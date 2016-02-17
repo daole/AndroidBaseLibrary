@@ -3,6 +3,7 @@ package com.dreamdigitizers.androidbaselibrary.views.classes.fragments.screens;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -82,37 +83,64 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 	}
 
 	@Override
-	public void showMessage(final int pStringResourceId) {
-		Toast.makeText(this.getActivity(), pStringResourceId, Toast.LENGTH_SHORT).show();
+	public void showMessage(int pMessageResourceId) {
+		this.showMessage(this.getString(pMessageResourceId));
 	}
 
 	@Override
-	public void showConfirmation(final int pStringResourceId, final UtilsDialog.IOnDialogButtonClickListener pListener) {
+	public void showMessage(String pMessage) {
+		Toast.makeText(this.getActivity(), pMessage, Toast.LENGTH_LONG).show();
+	}
+
+	@Override
+	public void showMessage(int pMessageResourceIdId, int pActionResourceId, View.OnClickListener pActionListener) {
+		this.mScreenActionsListener.onShowSnackbar(Snackbar.LENGTH_LONG, pMessageResourceIdId, pActionResourceId, pActionListener);
+	}
+
+	@Override
+	public void showMessage(String pMessage, String pAction, View.OnClickListener pActionListener) {
+		this.mScreenActionsListener.onShowSnackbar(Snackbar.LENGTH_LONG, pMessage, pAction, pActionListener);
+	}
+
+	@Override
+	public void showConfirmation(int pMessageResourceId, UtilsDialog.IOnDialogButtonClickListener pListener) {
+		this.showConfirmation(this.getString(pMessageResourceId), pListener);
+	}
+
+	@Override
+	public void showConfirmation(String pMessage, UtilsDialog.IOnDialogButtonClickListener pListener) {
 		String title = this.getString(R.string.title__dialog);
 		String positiveButtonText = this.getString(R.string.btn__ok);
 		String negativeButtonText = this.getString(R.string.btn__no);
-		String message = this.getString(pStringResourceId);
-		UtilsDialog.showDialog(this.getActivity(), title, message, true, positiveButtonText, negativeButtonText, pListener);
+		UtilsDialog.showDialog(this.getActivity(), title, pMessage, true, positiveButtonText, negativeButtonText, pListener);
 	}
 
 	@Override
-	public void showError(final int pStringResourceId) {
+	public void showError(int pMessageResourceId) {
+		this.showError(this.getString(pMessageResourceId));
+	}
+
+	@Override
+	public void showError(String pMessage) {
 		String title = this.getString(R.string.title__dialog_error);
 		String buttonText = this.getString(R.string.btn__ok);
-		String message = this.getString(pStringResourceId);
-		UtilsDialog.showErrorDialog(this.getActivity(), title, message, buttonText);
+		UtilsDialog.showErrorDialog(this.getActivity(), title, pMessage, buttonText);
 	}
 
 	@Override
-	public void showRetryableError(final int pStringResourceId, final boolean pIsEndActivity, final UtilsDialog.IRetryAction pRetryAction) {
+	public void showRetryableError(int pMessageResourceId, boolean pIsEndActivity, UtilsDialog.IRetryAction pRetryAction) {
+		this.showRetryableError(this.getString(pMessageResourceId), pIsEndActivity, pRetryAction);
+	}
+
+	@Override
+	public void showRetryableError(String pMessage, boolean pIsEndActivity, UtilsDialog.IRetryAction pRetryAction) {
 		String title = this.getString(R.string.title__dialog_error);
 		String positiveButtonText = this.getString(R.string.btn__ok);
 		String negativeButtonText = this.getString(R.string.btn__no);
-		String message = this.getString(pStringResourceId);
 		UtilsDialog.showRetryableErrorDialog(
 				this.getActivity(),
 				title,
-				message,
+				pMessage,
 				positiveButtonText,
 				negativeButtonText,
 				pIsEndActivity,
@@ -169,6 +197,8 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 	protected abstract P createPresenter();
 
 	public interface IOnScreenActionsListener {
+		void onShowSnackbar(int pLength, int pMessageResourceIdId, int pActionResourceId, View.OnClickListener pActionListener);
+		void onShowSnackbar(int pLength, String pMessage, String pAction, View.OnClickListener pActionListener);
 		void onSetCurrentScreen(ScreenBase pCurrentScreen);
 		void onChangeScreen(ScreenBase pScreen);
 		void onReturnActivityResult(int pResultCode, Intent pData);

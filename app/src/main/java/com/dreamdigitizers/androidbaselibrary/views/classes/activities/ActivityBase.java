@@ -2,11 +2,15 @@ package com.dreamdigitizers.androidbaselibrary.views.classes.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.dreamdigitizers.androidbaselibrary.ApplicationBase;
 import com.dreamdigitizers.androidbaselibrary.R;
+import com.dreamdigitizers.androidbaselibrary.utilities.UtilsString;
 import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.FragmentBase;
 import com.dreamdigitizers.androidbaselibrary.views.classes.fragments.screens.ScreenBase;
 
@@ -60,6 +64,23 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     @Override
     public boolean isBeingCovered(FragmentBase pFragment) {
         return false;
+    }
+
+    @Override
+    public void onShowSnackbar(int pLength, int pMessageResourceIdId, int pActionResourceId, View.OnClickListener pActionListener) {
+        this.onShowSnackbar(pLength, this.getString(pMessageResourceIdId), this.getString(pActionResourceId), pActionListener);
+    }
+
+    @Override
+    public void onShowSnackbar(int pLength, String pMessage, String pAction, View.OnClickListener pActionListener) {
+        CoordinatorLayout coordinatorLayout = this.getCoordinatorLayout();
+        if (coordinatorLayout != null) {
+            Snackbar snackbar = Snackbar.make(coordinatorLayout, pMessage, pLength);
+            if (!UtilsString.isEmpty(pAction) && pActionListener != null) {
+                snackbar.setAction(pAction, pActionListener);
+            }
+            snackbar.show();
+        }
     }
 
     @Override
@@ -177,6 +198,10 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     }
 
     protected void handleExtras(Bundle pExtras) {
+    }
+
+    protected CoordinatorLayout getCoordinatorLayout() {
+        return null;
     }
 
     protected abstract void setLayout();
