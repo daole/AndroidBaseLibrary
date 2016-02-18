@@ -13,7 +13,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.KeyEvent;
 
-import com.dreamdigitizers.androidbaselibrary.R;
 import com.dreamdigitizers.androidbaselibrary.utilities.UtilsString;
 import com.dreamdigitizers.androidbaselibrary.views.classes.activities.ActivityDummy;
 import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.CustomQueueItem;
@@ -25,6 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat implements IPlayback.ICallback {
+    public static final String ERROR_CODE__MEDIA_UNKNOWN = "-1";
+    public static final String ERROR_CODE__MEDIA_SKIP = "-2";
+    public static final String ERROR_CODE__MEDIA_NO_MATCHED_TRACK = "-3";
+    public static final String ERROR_CODE__MEDIA_UNPLAYABLE = "-4";
+    public static final String ERROR_CODE__MEDIA_INVALID_INDEX = "-5";
+
     public static final String ACTION__MEDIA_COMMAND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.ACTION__MEDIA_COMMAND";
     public static final String COMMAND__NAME = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.COMMAND__NAME";
     public static final String COMMAND__SKIP_TO_PREVIOUS = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_PREVIOUS";
@@ -141,8 +146,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     }
 
     @Override
-    public void onError(String pError) {
-        this.updatePlaybackState(pError);
+    public void onError(String pErrorCode) {
+        this.updatePlaybackState(pErrorCode);
     }
 
     protected void processSkipToPreviousRequest() {
@@ -153,7 +158,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest(this.getString(R.string.error__media_skip));
+            this.processStopRequest(ServiceMediaPlayer.ERROR_CODE__MEDIA_SKIP);
         }
     }
 
@@ -162,7 +167,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest(this.getString(R.string.error__media_search));
+            this.processStopRequest(ServiceMediaPlayer.ERROR_CODE__MEDIA_NO_MATCHED_TRACK);
         }
     }
 
@@ -198,11 +203,11 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
     }
 
-    protected void processStopRequest(String pError) {
+    protected void processStopRequest(String pErrorCode) {
         this.mPlayback.stop(true);
         //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
-        this.updatePlaybackState(pError);
+        this.updatePlaybackState(pErrorCode);
         this.stopSelf();
         this.mIsStarted = false;
     }
@@ -219,13 +224,13 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest(this.getString(R.string.error__media_skip));
+            this.processStopRequest(ServiceMediaPlayer.ERROR_CODE__MEDIA_SKIP);
         }
     }
 
     protected void updateMetadata() {
         if (!this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
-            this.updatePlaybackState(this.getString(R.string.error__media_unplayable));
+            this.updatePlaybackState(ServiceMediaPlayer.ERROR_CODE__MEDIA_INVALID_INDEX);
             return;
         }
 
@@ -241,7 +246,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     protected void fetchArt(CustomQueueItem pCustomQueueItem) {
     }
 
-    protected void updatePlaybackState(String pError) {
+    protected void updatePlaybackState(String pErrorCode) {
         /*
         long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
         if (this.mPlayback != null && this.mPlayback.isConnected()) {
@@ -254,8 +259,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
 
         int state = mPlayback.getState();
 
-        if (pError != null) {
-            stateBuilder.setErrorMessage(pError);
+        if (pErrorCode != null) {
+            stateBuilder.setErrorMessage(pErrorCode);
             state = PlaybackStateCompat.STATE_ERROR;
         }
         stateBuilder.setState(state, position, ServiceMediaPlayer.PLAYBACK_SPEED, SystemClock.elapsedRealtime());

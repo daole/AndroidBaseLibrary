@@ -16,7 +16,6 @@ public class LocalPlayback implements
         IPlayback,
         AudioManager.OnAudioFocusChangeListener,
         UtilsMediaPlayer.CustomMediaPlayer.IOnMediaPlayerActionResultListener {
-    private static final String ERROR_MESSAGE__MEDIA_PLAYER_UNCLEAR = "MediaPlayer error, what: %d, extra: %d";
     private static final String TAG__WIFI_LOCK = "LocalPlayback.WifiLock";
 
     private static final int AUDIO_FOCUS__NO_FOCUS_NO_DUCK = 0;
@@ -89,7 +88,7 @@ public class LocalPlayback implements
             boolean result = this.mUtilsMediaPlayer.setDataSource(streamUrl);
             if (!result) {
                 if (this.mCallback != null) {
-                    this.mCallback.onError("Can not set data source");
+                    this.mCallback.onError(ServiceMediaPlayer.ERROR_CODE__MEDIA_UNPLAYABLE);
                     return;
                 }
             }
@@ -282,7 +281,7 @@ public class LocalPlayback implements
     @Override
     public boolean onError(UtilsMediaPlayer.CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra) {
         if (this.mCallback != null) {
-            this.mCallback.onError(String.format(LocalPlayback.ERROR_MESSAGE__MEDIA_PLAYER_UNCLEAR, pWhat, pExtra));
+            this.mCallback.onError(ServiceMediaPlayer.ERROR_CODE__MEDIA_UNKNOWN);
         }
         return true;
     }
