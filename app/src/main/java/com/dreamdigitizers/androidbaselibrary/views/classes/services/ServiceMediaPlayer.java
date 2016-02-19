@@ -471,6 +471,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
                         }
                         if (!UtilsString.isEmpty(command)) {
                             Intent intent = new Intent(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
+                            intent.setPackage(pContext.getPackageName());
                             intent.putExtra(ServiceMediaPlayer.COMMAND__NAME, command);
                             pContext.startService(intent);
                         }
