@@ -228,6 +228,9 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         }
     }
 
+    protected void processCustomActionRequest(String pAction, Bundle pExtras) {
+    }
+
     protected void updateMetadata() {
         if (!this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.updatePlaybackState(ServiceMediaPlayer.ERROR_CODE__MEDIA_INVALID_INDEX);
@@ -427,6 +430,11 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         @Override
         public void onSkipToNext() {
             ServiceMediaPlayer.this.processSkipToNextRequest();
+        }
+
+        @Override
+        public void onCustomAction(String pAction, Bundle pExtras) {
+            ServiceMediaPlayer.this.processCustomActionRequest(pAction, pExtras);
         }
     }
 
