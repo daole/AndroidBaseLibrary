@@ -10,7 +10,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import com.dreamdigitizers.androidbaselibrary.utilities.UtilsMediaPlayer;
 import com.dreamdigitizers.androidbaselibrary.utilities.UtilsString;
-import com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer;
+import com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser;
 
 public class LocalPlayback implements
         IPlayback,
@@ -35,14 +35,14 @@ public class LocalPlayback implements
     private boolean mIsOnlineStreaming;
 
     private ICallback mCallback;
-    private final ServiceMediaPlayer mService;
+    private final ServiceMediaBrowser mService;
     private final AudioManager mAudioManager;
     private final WifiManager.WifiLock mWifiLock;
     private final UtilsMediaPlayer mUtilsMediaPlayer;
     private final AudioNoisyReceiver mAudioNoisyReceiver;
     private final IntentFilter mAudioNoisyIntentFilter;
 
-    public LocalPlayback(ServiceMediaPlayer pService, boolean pIsOnlineStreaming) {
+    public LocalPlayback(ServiceMediaBrowser pService, boolean pIsOnlineStreaming) {
         this.mService = pService;
         this.mIsOnlineStreaming = pIsOnlineStreaming;
         this.mAudioFocus = LocalPlayback.AUDIO_FOCUS__NO_FOCUS_NO_DUCK;
@@ -88,7 +88,7 @@ public class LocalPlayback implements
             boolean result = this.mUtilsMediaPlayer.setDataSource(streamUrl);
             if (!result) {
                 if (this.mCallback != null) {
-                    this.mCallback.onError(ServiceMediaPlayer.ERROR_CODE__MEDIA_UNPLAYABLE);
+                    this.mCallback.onError(ServiceMediaBrowser.ERROR_CODE__MEDIA_UNPLAYABLE);
                     return;
                 }
             }
@@ -281,7 +281,7 @@ public class LocalPlayback implements
     @Override
     public boolean onError(UtilsMediaPlayer.CustomMediaPlayer pMediaPlayer, int pWhat, int pExtra) {
         if (this.mCallback != null) {
-            this.mCallback.onError(ServiceMediaPlayer.ERROR_CODE__MEDIA_UNKNOWN);
+            this.mCallback.onError(ServiceMediaBrowser.ERROR_CODE__MEDIA_UNKNOWN);
         }
         return true;
     }

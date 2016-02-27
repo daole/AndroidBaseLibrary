@@ -13,7 +13,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
-import com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer;
+import com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser;
 
 public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver {
     private static final int NOTIFICATION_ID = 1;
@@ -29,7 +29,7 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
 
     protected final NotificationManager mNotificationManager;
 
-    protected ServiceMediaPlayer mService;
+    protected ServiceMediaBrowser mService;
     protected MediaSessionCompat.Token mSessionToken;
     protected MediaControllerCompat mMediaController;
     protected MediaControllerCompat.TransportControls mTransportControls;
@@ -48,7 +48,7 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
 
     protected boolean mStarted;
 
-    public MediaPlayerNotificationReceiver(ServiceMediaPlayer pService) {
+    public MediaPlayerNotificationReceiver(ServiceMediaBrowser pService) {
         this.mService = pService;
         this.mMediaControllerCallback = new MediaControllerCallback();
         this.mNotificationManager = (NotificationManager) this.mService.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -60,28 +60,28 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
     @Override
     public void onReceive(Context pContext, Intent pIntent) {
         String action = pIntent.getAction();
-        if (ServiceMediaPlayer.ACTION__MEDIA_COMMAND.equals(action)) {
-            String command = pIntent.getStringExtra(ServiceMediaPlayer.COMMAND__NAME);
+        if (ServiceMediaBrowser.ACTION__MEDIA_COMMAND.equals(action)) {
+            String command = pIntent.getStringExtra(ServiceMediaBrowser.COMMAND__NAME);
             switch (command) {
-                case ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS:
+                case ServiceMediaBrowser.COMMAND__SKIP_TO_PREVIOUS:
                     this.mTransportControls.skipToPrevious();
                     break;
-                case ServiceMediaPlayer.COMMAND__REWIND:
+                case ServiceMediaBrowser.COMMAND__REWIND:
                     this.mTransportControls.rewind();
                     break;
-                case ServiceMediaPlayer.COMMAND__PLAY:
+                case ServiceMediaBrowser.COMMAND__PLAY:
                     this.mTransportControls.play();
                     break;
-                case ServiceMediaPlayer.COMMAND__PAUSE:
+                case ServiceMediaBrowser.COMMAND__PAUSE:
                     this.mTransportControls.pause();
                     break;
-                case ServiceMediaPlayer.COMMAND__STOP:
+                case ServiceMediaBrowser.COMMAND__STOP:
                     this.mTransportControls.stop();
                     break;
-                case ServiceMediaPlayer.COMMAND__FAST_FORWARD:
+                case ServiceMediaBrowser.COMMAND__FAST_FORWARD:
                     this.mTransportControls.fastForward();
                     break;
-                case ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT:
+                case ServiceMediaBrowser.COMMAND__SKIP_TO_NEXT:
                     this.mTransportControls.skipToNext();
                     break;
                 default:
@@ -130,7 +130,7 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
             Notification notification = this.createNotification();
             if (notification != null) {
                 this.mMediaController.registerCallback(this.mMediaControllerCallback);
-                IntentFilter filter = new IntentFilter(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
+                IntentFilter filter = new IntentFilter(ServiceMediaBrowser.ACTION__MEDIA_COMMAND);
                 this.mService.registerReceiver(this, filter);
                 this.mService.startForeground(MediaPlayerNotificationReceiver.NOTIFICATION_ID, notification);
                 this.mStarted = true;
@@ -193,20 +193,20 @@ public abstract class MediaPlayerNotificationReceiver extends BroadcastReceiver 
     }
 
     private void buildSupportedPendingIntents() {
-        this.mSkipToPreviousPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_PREVIOUS);
-        this.mRewindPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__REWIND, MediaPlayerNotificationReceiver.REQUEST_CODE__REWIND);
-        this.mTogglePlaybackPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__TOGGLE_PLAYBACK, MediaPlayerNotificationReceiver.REQUEST_CODE__TOGGLE_PLAYBACK);
-        this.mPlayPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__PLAY, MediaPlayerNotificationReceiver.REQUEST_CODE__PLAY);
-        this.mPausePendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__PAUSE, MediaPlayerNotificationReceiver.REQUEST_CODE__PAUSE);
-        this.mStopPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__STOP, MediaPlayerNotificationReceiver.REQUEST_CODE__STOP);
-        this.mFastForwardPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__FAST_FORWARD, MediaPlayerNotificationReceiver.REQUEST_CODE__FAST_FORWARD);
-        this.mSkipToNextPendingIntent = this.buildSupportedPendingIntent(ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_NEXT);
+        this.mSkipToPreviousPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__SKIP_TO_PREVIOUS, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_PREVIOUS);
+        this.mRewindPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__REWIND, MediaPlayerNotificationReceiver.REQUEST_CODE__REWIND);
+        this.mTogglePlaybackPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__TOGGLE_PLAYBACK, MediaPlayerNotificationReceiver.REQUEST_CODE__TOGGLE_PLAYBACK);
+        this.mPlayPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__PLAY, MediaPlayerNotificationReceiver.REQUEST_CODE__PLAY);
+        this.mPausePendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__PAUSE, MediaPlayerNotificationReceiver.REQUEST_CODE__PAUSE);
+        this.mStopPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__STOP, MediaPlayerNotificationReceiver.REQUEST_CODE__STOP);
+        this.mFastForwardPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__FAST_FORWARD, MediaPlayerNotificationReceiver.REQUEST_CODE__FAST_FORWARD);
+        this.mSkipToNextPendingIntent = this.buildSupportedPendingIntent(ServiceMediaBrowser.COMMAND__SKIP_TO_NEXT, MediaPlayerNotificationReceiver.REQUEST_CODE__SKIP_TO_NEXT);
     }
 
     private PendingIntent buildSupportedPendingIntent(String pCommand, int pRequestCode) {
-        Intent intent = new Intent(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
+        Intent intent = new Intent(ServiceMediaBrowser.ACTION__MEDIA_COMMAND);
         intent.setPackage(this.mService.getPackageName());
-        intent.putExtra(ServiceMediaPlayer.COMMAND__NAME, pCommand);
+        intent.putExtra(ServiceMediaBrowser.COMMAND__NAME, pCommand);
         return PendingIntent.getBroadcast(this.mService, pRequestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 

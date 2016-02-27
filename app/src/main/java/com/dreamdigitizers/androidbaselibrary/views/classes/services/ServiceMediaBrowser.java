@@ -23,24 +23,24 @@ import com.dreamdigitizers.androidbaselibrary.views.classes.services.support.Med
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat implements IPlayback.ICallback {
+public abstract class ServiceMediaBrowser extends MediaBrowserServiceCompat implements IPlayback.ICallback {
     public static final String ERROR_CODE__MEDIA_UNKNOWN = "-1";
     public static final String ERROR_CODE__MEDIA_SKIP = "-2";
     public static final String ERROR_CODE__MEDIA_NO_MATCHED_TRACK = "-3";
     public static final String ERROR_CODE__MEDIA_UNPLAYABLE = "-4";
     public static final String ERROR_CODE__MEDIA_INVALID_INDEX = "-5";
 
-    public static final String ACTION__MEDIA_COMMAND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.ACTION__MEDIA_COMMAND";
-    public static final String COMMAND__NAME = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.COMMAND__NAME";
-    public static final String COMMAND__SKIP_TO_PREVIOUS = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_PREVIOUS";
-    public static final String COMMAND__REWIND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.REWIND";
-    public static final String COMMAND__TOGGLE_PLAYBACK = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.TOGGLE_PLAYBACK";
-    public static final String COMMAND__PLAY_PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PLAY_PAUSE";
-    public static final String COMMAND__PLAY = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PLAY";
-    public static final String COMMAND__PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.PAUSE";
-    public static final String COMMAND__STOP = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.STOP";
-    public static final String COMMAND__FAST_FORWARD = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.FAST_FORWARD";
-    public static final String COMMAND__SKIP_TO_NEXT = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaPlayer.SKIP_TO_NEXT";
+    public static final String ACTION__MEDIA_COMMAND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.ACTION__MEDIA_COMMAND";
+    public static final String COMMAND__NAME = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.COMMAND__NAME";
+    public static final String COMMAND__SKIP_TO_PREVIOUS = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.SKIP_TO_PREVIOUS";
+    public static final String COMMAND__REWIND = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.REWIND";
+    public static final String COMMAND__TOGGLE_PLAYBACK = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.TOGGLE_PLAYBACK";
+    public static final String COMMAND__PLAY_PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.PLAY_PAUSE";
+    public static final String COMMAND__PLAY = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.PLAY";
+    public static final String COMMAND__PAUSE = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.PAUSE";
+    public static final String COMMAND__STOP = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.STOP";
+    public static final String COMMAND__FAST_FORWARD = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.FAST_FORWARD";
+    public static final String COMMAND__SKIP_TO_NEXT = "com.dreamdigitizers.androidbaselibrary.views.classes.services.ServiceMediaBrowser.SKIP_TO_NEXT";
 
     protected static final float PLAYBACK_SPEED = 1.0f;
     //protected static final int STOP_DELAY = 30000;
@@ -76,32 +76,32 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     public int onStartCommand(Intent pIntent, int pFlags, int pStartId) {
         if (pIntent != null) {
             String action = pIntent.getAction();
-            if (ServiceMediaPlayer.ACTION__MEDIA_COMMAND.equals(action)) {
-                String command = pIntent.getStringExtra(ServiceMediaPlayer.COMMAND__NAME);
+            if (ServiceMediaBrowser.ACTION__MEDIA_COMMAND.equals(action)) {
+                String command = pIntent.getStringExtra(ServiceMediaBrowser.COMMAND__NAME);
                 if (!UtilsString.isEmpty(command)) {
                     switch (command) {
-                        case ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS:
+                        case ServiceMediaBrowser.COMMAND__SKIP_TO_PREVIOUS:
                             this.processSkipToPreviousRequest();
                             break;
-                        case ServiceMediaPlayer.COMMAND__REWIND:
+                        case ServiceMediaBrowser.COMMAND__REWIND:
                             //this.handleRewindRequest();
                             break;
-                        case ServiceMediaPlayer.COMMAND__PLAY_PAUSE:
+                        case ServiceMediaBrowser.COMMAND__PLAY_PAUSE:
                             this.processPlayPauseRequest();
                             break;
-                        case ServiceMediaPlayer.COMMAND__PLAY:
+                        case ServiceMediaBrowser.COMMAND__PLAY:
                             this.processPlayRequest();
                             break;
-                        case ServiceMediaPlayer.COMMAND__PAUSE:
+                        case ServiceMediaBrowser.COMMAND__PAUSE:
                             this.processPauseRequest();
                             break;
-                        case ServiceMediaPlayer.COMMAND__STOP:
+                        case ServiceMediaBrowser.COMMAND__STOP:
                             this.processStopRequest(null);
                             break;
-                        case ServiceMediaPlayer.COMMAND__FAST_FORWARD:
+                        case ServiceMediaBrowser.COMMAND__FAST_FORWARD:
                             //this.handleFastForwardRequest();
                             break;
-                        case ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT:
+                        case ServiceMediaBrowser.COMMAND__SKIP_TO_NEXT:
                             this.processSkipToNextRequest();
                             break;
                         default:
@@ -112,8 +112,8 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         }
 
         //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
-        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
-        return ServiceMediaPlayer.START_STICKY;
+        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaBrowser.STOP_DELAY);
+        return ServiceMediaBrowser.START_STICKY;
     }
 
     @Override
@@ -158,7 +158,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest(ServiceMediaPlayer.ERROR_CODE__MEDIA_SKIP);
+            this.processStopRequest(ServiceMediaBrowser.ERROR_CODE__MEDIA_SKIP);
         }
     }
 
@@ -167,7 +167,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest(ServiceMediaPlayer.ERROR_CODE__MEDIA_NO_MATCHED_TRACK);
+            this.processStopRequest(ServiceMediaBrowser.ERROR_CODE__MEDIA_NO_MATCHED_TRACK);
         }
     }
 
@@ -183,7 +183,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     protected void processPlayRequest() {
         //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
         if (!this.mIsStarted) {
-            //this.startService(new Intent(this, ServiceMediaPlayer.class));
+            //this.startService(new Intent(this, ServiceMediaBrowser.class));
             this.mIsStarted = true;
         }
 
@@ -200,13 +200,13 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     protected void processPauseRequest() {
         this.mPlayback.pause();
         //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
-        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaBrowser.STOP_DELAY);
     }
 
     protected void processStopRequest(String pErrorCode) {
         this.mPlayback.stop(true);
         //this.mDelayedStopHandler.removeCallbacksAndMessages(null);
-        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaPlayer.STOP_DELAY);
+        //this.mDelayedStopHandler.sendEmptyMessageDelayed(0, ServiceMediaBrowser.STOP_DELAY);
         this.updatePlaybackState(pErrorCode);
         this.stopSelf();
         this.mIsStarted = false;
@@ -224,7 +224,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             this.processPlayRequest();
         } else {
-            this.processStopRequest(ServiceMediaPlayer.ERROR_CODE__MEDIA_SKIP);
+            this.processStopRequest(ServiceMediaBrowser.ERROR_CODE__MEDIA_SKIP);
         }
     }
 
@@ -233,7 +233,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
 
     protected void updateMetadata() {
         if (!this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
-            this.updatePlaybackState(ServiceMediaPlayer.ERROR_CODE__MEDIA_INVALID_INDEX);
+            this.updatePlaybackState(ServiceMediaBrowser.ERROR_CODE__MEDIA_INVALID_INDEX);
             return;
         }
 
@@ -266,7 +266,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
             stateBuilder.setErrorMessage(pErrorCode);
             state = PlaybackStateCompat.STATE_ERROR;
         }
-        stateBuilder.setState(state, position, ServiceMediaPlayer.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
+        stateBuilder.setState(state, position, ServiceMediaBrowser.PLAYBACK_SPEED, SystemClock.elapsedRealtime());
 
         if (this.isIndexPlayable(this.mCurrentIndexOnQueue, this.mPlayingQueue)) {
             MediaSessionCompat.QueueItem queueItem = this.mPlayingQueue.get(this.mCurrentIndexOnQueue).getQueueItem();
@@ -321,7 +321,7 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
         ComponentName mediaButtonReceiverComponent = new ComponentName(this, MediaButtonReceiver.class);
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(mediaButtonReceiverComponent);
-        PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(this, ServiceMediaPlayer.REQUEST_CODE, mediaButtonIntent, 0);
+        PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(this, ServiceMediaBrowser.REQUEST_CODE, mediaButtonIntent, 0);
 
         this.mMediaSession = new MediaSessionCompat(this, this.getClass().getName(), mediaButtonReceiverComponent, mediaButtonPendingIntent);
         this.mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -376,15 +376,15 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
 
     /*
     private class DelayedStopHandler extends Handler {
-        private final WeakReference<ServiceMediaPlayer> mWeakReference;
+        private final WeakReference<ServiceMediaBrowser> mWeakReference;
 
-        private DelayedStopHandler(ServiceMediaPlayer pService) {
+        private DelayedStopHandler(ServiceMediaBrowser pService) {
             this.mWeakReference = new WeakReference<>(pService);
         }
 
         @Override
         public void handleMessage(Message pMessage) {
-            ServiceMediaPlayer service = this.mWeakReference.get();
+            ServiceMediaBrowser service = this.mWeakReference.get();
             if (service != null && service.mPlayback != null) {
                 if (service.mPlayback.isPlaying()) {
                     return;
@@ -399,42 +399,42 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
     public class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onSkipToPrevious() {
-            ServiceMediaPlayer.this.processSkipToPreviousRequest();
+            ServiceMediaBrowser.this.processSkipToPreviousRequest();
         }
 
         @Override
         public void onPlayFromMediaId(String pMediaId, Bundle pExtras) {
-            ServiceMediaPlayer.this.processPlayFromMediaIdRequest(pMediaId, pExtras);
+            ServiceMediaBrowser.this.processPlayFromMediaIdRequest(pMediaId, pExtras);
         }
 
         @Override
         public void onPlay() {
-            ServiceMediaPlayer.this.processPlayRequest();
+            ServiceMediaBrowser.this.processPlayRequest();
         }
 
         @Override
         public void onPause() {
-            ServiceMediaPlayer.this.processPauseRequest();
+            ServiceMediaBrowser.this.processPauseRequest();
         }
 
         @Override
         public void onStop() {
-            ServiceMediaPlayer.this.processStopRequest(null);
+            ServiceMediaBrowser.this.processStopRequest(null);
         }
 
         @Override
         public void onSeekTo(long pPosition) {
-            ServiceMediaPlayer.this.processSeekToRequest((int) pPosition);
+            ServiceMediaBrowser.this.processSeekToRequest((int) pPosition);
         }
 
         @Override
         public void onSkipToNext() {
-            ServiceMediaPlayer.this.processSkipToNextRequest();
+            ServiceMediaBrowser.this.processSkipToNextRequest();
         }
 
         @Override
         public void onCustomAction(String pAction, Bundle pExtras) {
-            ServiceMediaPlayer.this.processCustomActionRequest(pAction, pExtras);
+            ServiceMediaBrowser.this.processCustomActionRequest(pAction, pExtras);
         }
     }
 
@@ -450,37 +450,37 @@ public abstract class ServiceMediaPlayer extends MediaBrowserServiceCompat imple
                         int keyCode = keyEvent.getKeyCode();
                         switch (keyCode) {
                             case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                                command = ServiceMediaPlayer.COMMAND__SKIP_TO_PREVIOUS;
+                                command = ServiceMediaBrowser.COMMAND__SKIP_TO_PREVIOUS;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_REWIND:
-                                command = ServiceMediaPlayer.COMMAND__REWIND;
+                                command = ServiceMediaBrowser.COMMAND__REWIND;
                                 break;
                             case KeyEvent.KEYCODE_HEADSETHOOK:
                             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                                command = ServiceMediaPlayer.COMMAND__PLAY_PAUSE;
+                                command = ServiceMediaBrowser.COMMAND__PLAY_PAUSE;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PLAY:
-                                command = ServiceMediaPlayer.COMMAND__PLAY;
+                                command = ServiceMediaBrowser.COMMAND__PLAY;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                                command = ServiceMediaPlayer.COMMAND__PAUSE;
+                                command = ServiceMediaBrowser.COMMAND__PAUSE;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_STOP:
-                                command = ServiceMediaPlayer.COMMAND__STOP;
+                                command = ServiceMediaBrowser.COMMAND__STOP;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                                command = ServiceMediaPlayer.COMMAND__FAST_FORWARD;
+                                command = ServiceMediaBrowser.COMMAND__FAST_FORWARD;
                                 break;
                             case KeyEvent.KEYCODE_MEDIA_NEXT:
-                                command = ServiceMediaPlayer.COMMAND__SKIP_TO_NEXT;
+                                command = ServiceMediaBrowser.COMMAND__SKIP_TO_NEXT;
                                 break;
                             default:
                                 break;
                         }
                         if (!UtilsString.isEmpty(command)) {
-                            Intent intent = new Intent(ServiceMediaPlayer.ACTION__MEDIA_COMMAND);
+                            Intent intent = new Intent(ServiceMediaBrowser.ACTION__MEDIA_COMMAND);
                             intent.setPackage(pContext.getPackageName());
-                            intent.putExtra(ServiceMediaPlayer.COMMAND__NAME, command);
+                            intent.putExtra(ServiceMediaBrowser.COMMAND__NAME, command);
                             pContext.startService(intent);
                         }
                     }
