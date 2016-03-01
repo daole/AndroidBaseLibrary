@@ -142,4 +142,10 @@
     <style name="ProgressBar.ProgressDialog" parent="ProgressBar">
         <item name="android:layout_centerInParent">true</item>
     </style>
+
+    <style name="AdView" parent="Container.WrapContent">
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:visibility">gone</item>
+    </style>
 </resources>
