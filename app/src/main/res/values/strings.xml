@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="btn__ok">OK</string>
+    <string name="btn__Yes">Yes</string>
     <string name="btn__no">No</string>
 
     <string name="title__dialog">Message</string>
