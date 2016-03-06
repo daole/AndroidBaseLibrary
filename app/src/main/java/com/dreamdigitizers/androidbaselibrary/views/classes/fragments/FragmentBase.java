@@ -60,10 +60,18 @@ public abstract class FragmentBase extends Fragment {
         if (!this.mStateChecker.isBeingCovered(this)) {
             this.createOptionsMenu(pMenu, pInflater);
             int titleStringId = this.getTitle();
-            if (titleStringId > 0) {
+            String titleString = null;
+            if (titleStringId <= 0) {
+                titleString = this.getTitleString();
+            }
+            if (titleStringId > 0 || titleString != null) {
                 ActionBar actionBar = this.getActionBar();
                 actionBar.setDisplayShowTitleEnabled(true);
-                actionBar.setTitle(titleStringId);
+                if (titleStringId > 0) {
+                    actionBar.setTitle(titleStringId);
+                } else {
+                    actionBar.setTitle(titleString);
+                }
             }
         }
     }
@@ -86,6 +94,10 @@ public abstract class FragmentBase extends Fragment {
     }
 
     protected void recoverInstanceState(Bundle pSavedInstanceState) {
+    }
+
+    protected String getTitleString() {
+        return null;
     }
 
     protected abstract View loadView(LayoutInflater pInflater, ViewGroup pContainer);
