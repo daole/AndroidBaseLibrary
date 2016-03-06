@@ -30,7 +30,7 @@ public class UtilsDialog {
 			final Activity pActivity,
 			final String pTitle,
 			final String pMessage,
-			final boolean pIsTwoButton,
+			final boolean pIsTwoButtons,
 			final String pPositiveButtonText,
 			final String pNegativeButtonText,
 			final IOnDialogButtonClickListener pListener) {
@@ -45,13 +45,13 @@ public class UtilsDialog {
 							pActivity,
 							pTitle,
 							pMessage,
-							pIsTwoButton,
+							pIsTwoButtons,
 							pPositiveButtonText,
 							pNegativeButtonText);
 				}
 			}
 		});
-		if (pIsTwoButton) {
+		if (pIsTwoButtons) {
 			alertDialogBuilder.setNegativeButton(pNegativeButtonText, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface pDialog, int pWhich) {
 				if (pListener != null) {
@@ -59,7 +59,7 @@ public class UtilsDialog {
 							pActivity,
 							pTitle,
 							pMessage,
-							pIsTwoButton,
+							pIsTwoButtons,
 							pPositiveButtonText,
 							pNegativeButtonText);
 				}
@@ -86,7 +86,7 @@ public class UtilsDialog {
 					Activity pActivity,
 					String pTitle,
 					String pMessage,
-					boolean pIsTwoButton,
+					boolean pIsTwoButtons,
 					String pPositiveButtonText,
 					String pNegativeButtonText) {
 			}
@@ -96,7 +96,7 @@ public class UtilsDialog {
 					Activity pActivity,
 					String pTitle,
 					String pMessage,
-					boolean pIsTwoButton,
+					boolean pIsTwoButtons,
 					String pPositiveButtonText,
 					String pNegativeButtonText) {
 			}
@@ -142,7 +142,7 @@ public class UtilsDialog {
 					Activity pActivity,
 					String pTitle,
 					String pMessage,
-					boolean pIsTwoButton,
+					boolean pIsTwoButtons,
 					String pPositiveButtonText,
 					String pNegativeButtonText) {
 				if (pIsEndActivity) {
@@ -156,7 +156,7 @@ public class UtilsDialog {
 			public void onNegativeButtonClick(
 					Activity pActivity,
 					String pTitle, String pMessage,
-					boolean pIsTwoButton,
+					boolean pIsTwoButtons,
 					String pPositiveButtonText,
 					String pNegativeButtonText) {
 
@@ -334,7 +334,7 @@ public class UtilsDialog {
 				final Activity pActivity,
 				final String pTitle,
 				final String pMessage,
-				final boolean pIsTwoButton,
+				final boolean pIsTwoButtons,
 				final String pPositiveButtonText,
 				final String pNegativeButtonText);
 
@@ -342,7 +342,7 @@ public class UtilsDialog {
 				final Activity pActivity,
 				final String pTitle,
 				final String pMessage,
-				final boolean pIsTwoButton,
+				final boolean pIsTwoButtons,
 				final String pPositiveButtonText,
 				final String pNegativeButtonText);
 	}

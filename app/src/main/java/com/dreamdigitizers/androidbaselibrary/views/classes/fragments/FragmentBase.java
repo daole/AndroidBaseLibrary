@@ -17,6 +17,8 @@ public abstract class FragmentBase extends Fragment {
 
     protected IStateChecker mStateChecker;
 
+    private View mView;
+
     @Override
     public void onAttach(Context pContext) {
         super.onAttach(pContext);
@@ -48,11 +50,13 @@ public abstract class FragmentBase extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater pInflater, ViewGroup pContainer, Bundle pSavedInstanceState) {
-        View view = this.loadView(pInflater, pContainer);
-        this.retrieveScreenItems(view);
-        this.mapInformationToScreenItems(view);
-        this.setHasOptionsMenu(true);
-        return view;
+        if (this.mView == null || !this.isCacheView()) {
+            this.mView = this.loadView(pInflater, pContainer);
+            this.retrieveScreenItems(this.mView);
+            this.mapInformationToScreenItems(this.mView);
+            this.setHasOptionsMenu(true);
+        }
+        return this.mView;
     }
 
     @Override
@@ -98,6 +102,10 @@ public abstract class FragmentBase extends Fragment {
 
     protected String getTitleString() {
         return null;
+    }
+
+    protected boolean isCacheView() {
+        return true;
     }
 
     protected abstract View loadView(LayoutInflater pInflater, ViewGroup pContainer);
