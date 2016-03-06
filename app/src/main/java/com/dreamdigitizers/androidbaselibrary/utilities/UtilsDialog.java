@@ -147,7 +147,7 @@ public class UtilsDialog {
 					String pNegativeButtonText) {
 				if (pIsEndActivity) {
 					pActivity.finish();
-				} else if(pRetryAction != null) {
+				} else if (pRetryAction != null) {
 					pRetryAction.retry();
 				}
 			}
