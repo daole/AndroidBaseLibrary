@@ -3,6 +3,7 @@
     <string name="btn__ok">OK</string>
     <string name="btn__yes">はい</string>
     <string name="btn__no">いいえ</string>
+    <string name="btn__cancel">キャンセル</string>
 
     <string name="title__dialog">メッセージ</string>
     <string name="title__dialog_error">エラー</string>

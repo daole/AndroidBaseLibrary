@@ -3,6 +3,7 @@
     <string name="btn__ok">Đồng ý</string>
     <string name="btn__yes">Đúng</string>
     <string name="btn__no">Không</string>
+    <string name="btn__cancel">Hủy</string>
 
     <string name="title__dialog">Thông tin</string>
     <string name="title__dialog_error">Lỗi</string>

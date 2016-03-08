@@ -88,6 +88,14 @@ public abstract class FragmentBase extends Fragment {
         return ((AppCompatActivity) this.getActivity()).getSupportActionBar();
     }
 
+    protected String getTitleString() {
+        return null;
+    }
+
+    protected boolean isCacheView() {
+        return true;
+    }
+
     protected void createOptionsMenu(Menu pMenu, MenuInflater pInflater) {
     }
 
@@ -98,14 +106,6 @@ public abstract class FragmentBase extends Fragment {
     }
 
     protected void recoverInstanceState(Bundle pSavedInstanceState) {
-    }
-
-    protected String getTitleString() {
-        return null;
-    }
-
-    protected boolean isCacheView() {
-        return true;
     }
 
     protected abstract View loadView(LayoutInflater pInflater, ViewGroup pContainer);

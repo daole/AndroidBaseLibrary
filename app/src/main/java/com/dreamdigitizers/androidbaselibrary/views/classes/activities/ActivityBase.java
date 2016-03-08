@@ -22,13 +22,13 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
     protected void onCreate(Bundle pSavedInstanceState) {
         super.onCreate(pSavedInstanceState);
 
-        if (pSavedInstanceState != null) {
-            this.recoverInstanceState(pSavedInstanceState);
+        Intent intent = this.getIntent();
+        if (intent != null) {
+            this.handleIntent(intent);
         }
 
-        Bundle extras = this.getIntent().getExtras();
-        if (extras != null) {
-            this.handleExtras(extras);
+        if (pSavedInstanceState != null) {
+            this.recoverInstanceState(pSavedInstanceState);
         }
 
         this.setLayout();
@@ -197,7 +197,7 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
         this.mIsRecreated = true;
     }
 
-    protected void handleExtras(Bundle pExtras) {
+    protected void handleIntent(Intent pIntent) {
     }
 
     protected CoordinatorLayout getCoordinatorLayout() {

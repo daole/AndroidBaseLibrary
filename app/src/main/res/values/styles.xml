@@ -43,6 +43,10 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
+    <style name="Container.WrapContent.Vertical.DialogButtons" parent="Container.WrapContent.Vertical.OrientationHorizontal">
+        <item name="android:gravity">right</item>
+    </style>
+
     <style name="Container.WrapContent.Vertical.Row" parent="Container.WrapContent.Vertical">
         <item name="android:gravity">center_vertical</item>
     </style>
@@ -113,13 +117,25 @@
         <item name="android:background">@drawable/toolbar_shadow</item>
     </style>
 
-    <style name="TextView">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
+    <style name="TextView" parent="Container.WrapContent">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
     </style>
 
-    <style name="ImageView">
+    <style name="EditText" parent="Container.WrapContent.Vertical">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+    </style>
+
+    <style name="Button" parent="Container.WrapContent">
+    </style>
+
+    <style name="Button.BorderLess" parent="Button">
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="RadioButton" parent="Container.WrapContent">
+    </style>
+
+    <style name="ImageView" parent="Container.WrapContent">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:scaleType">centerInside</item>
@@ -129,9 +145,7 @@
         <item name="android:background">@null</item>
     </style>
 
-    <style name="SeekBar">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
+    <style name="SeekBar" parent="Container.WrapContent.Vertical">
         <item name="android:layout_marginLeft">@dimen/margin</item>
         <item name="android:layout_marginRight">@dimen/margin</item>
     </style>

@@ -294,7 +294,7 @@ public class UtilsDialog {
 			UtilsDialog.progressDialog.show();
 			UtilsDialog.progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 			UtilsDialog.progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-			UtilsDialog.progressDialog.setContentView(R.layout.dialog___progress);
+			UtilsDialog.progressDialog.setContentView(R.layout.dialog__progress);
 
 			ProgressBar progressBar = (ProgressBar) UtilsDialog.progressDialog.findViewById(R.id.pgbProgress);
 			progressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(pActivity, R.color.color_progress_dialog), PorterDuff.Mode.SRC_IN);

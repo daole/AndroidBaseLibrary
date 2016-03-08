@@ -3,6 +3,7 @@
     <string name="btn__ok">OK</string>
     <string name="btn__yes">Yes</string>
     <string name="btn__no">No</string>
+    <string name="btn__cancel">Cancel</string>
 
     <string name="title__dialog">Message</string>
     <string name="title__dialog_error">Error</string>
