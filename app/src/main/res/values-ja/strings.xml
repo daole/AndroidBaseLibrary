@@ -4,6 +4,10 @@
     <string name="btn__yes">はい</string>
     <string name="btn__no">いいえ</string>
     <string name="btn__cancel">キャンセル</string>
+    <string name="btn__add">追加</string>
+    <string name="btn__update">更新</string>
+    <string name="btn__delete">削除</string>
+    <string name="btn__remove">削除</string>
 
     <string name="title__dialog">メッセージ</string>
     <string name="title__dialog_error">エラー</string>

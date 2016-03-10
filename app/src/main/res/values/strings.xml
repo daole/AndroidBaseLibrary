@@ -4,6 +4,10 @@
     <string name="btn__yes">Yes</string>
     <string name="btn__no">No</string>
     <string name="btn__cancel">Cancel</string>
+    <string name="btn__add">Add</string>
+    <string name="btn__update">Update</string>
+    <string name="btn__delete">Delete</string>
+    <string name="btn__remove">Remove</string>
 
     <string name="title__dialog">Message</string>
     <string name="title__dialog_error">Error</string>

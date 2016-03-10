@@ -4,6 +4,10 @@
     <string name="btn__yes">Đúng</string>
     <string name="btn__no">Không</string>
     <string name="btn__cancel">Hủy</string>
+    <string name="btn__add">Thêm</string>
+    <string name="btn__update">Cập nhật</string>
+    <string name="btn__delete">Xóa</string>
+    <string name="btn__remove">Bỏ ra</string>
 
     <string name="title__dialog">Thông tin</string>
     <string name="title__dialog_error">Lỗi</string>
