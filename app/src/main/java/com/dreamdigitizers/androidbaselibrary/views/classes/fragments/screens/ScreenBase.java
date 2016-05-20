@@ -54,8 +54,8 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 	@Override
 	public void onPause() {
 		super.onPause();
-		InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(this.getView().getWindowToken(), 0);
+		InputMethodManager inputMethodManager = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		inputMethodManager.hideSoftInputFromWindow(this.getView().getWindowToken(), 0);
 	}
 
 	@Override
