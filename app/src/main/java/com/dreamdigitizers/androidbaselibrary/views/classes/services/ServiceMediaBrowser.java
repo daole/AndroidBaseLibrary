@@ -308,7 +308,7 @@ public abstract class ServiceMediaBrowser extends MediaBrowserServiceCompat impl
         if (pPlayingQueue != null) {
             int index = 0;
             for (CustomQueueItem customQueueItem : pPlayingQueue) {
-                if (customQueueItem.getQueueItem().getDescription().getMediaId().equals(pMediaId)) {
+                if (UtilsString.equals(pMediaId, customQueueItem.getQueueItem().getDescription().getMediaId())) {
                     return index;
                 }
                 index++;
