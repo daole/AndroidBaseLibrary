@@ -161,7 +161,7 @@ public class LocalPlayback implements
 
     @Override
     public boolean isPlaying() {
-        return this.mIsPlayOnFocusGain || (this.mUtilsMediaPlayer.isPlaying());
+        return this.mIsPlayOnFocusGain || this.mUtilsMediaPlayer.isPlaying();
     }
 
     /*
