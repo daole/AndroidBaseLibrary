@@ -27,7 +27,9 @@ public interface IPlayback {
 
     //void setCurrentStreamPosition(int pPosition);
 
-    //void updateLastKnownStreamPosition();// Unused now
+    //void updateLastKnownStreamPosition();
+
+    int getDuration();
 
     void setCallback(ICallback pCallback);
 

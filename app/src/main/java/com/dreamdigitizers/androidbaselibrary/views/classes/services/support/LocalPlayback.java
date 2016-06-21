@@ -208,6 +208,11 @@ public class LocalPlayback implements
     */
 
     @Override
+    public int getDuration() {
+        return this.mUtilsMediaPlayer.getDuration();
+    }
+
+    @Override
     public void setCallback(ICallback pCallback) {
         this.mCallback = pCallback;
     }

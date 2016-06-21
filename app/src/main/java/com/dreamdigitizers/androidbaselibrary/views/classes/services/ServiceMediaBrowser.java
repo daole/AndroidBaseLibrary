@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserServiceCompat;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -241,7 +242,8 @@ public abstract class ServiceMediaBrowser extends MediaBrowserServiceCompat impl
         MediaMetadataCompat mediaMetadata = customQueueItem.getMediaMetadata();
         this.mMediaSession.setMetadata(mediaMetadata);
 
-        if (mediaMetadata.getDescription().getIconBitmap() == null && mediaMetadata.getDescription().getIconUri() != null) {
+        MediaDescriptionCompat mediaDescription = mediaMetadata.getDescription();
+        if (mediaDescription.getIconBitmap() == null && mediaDescription.getIconUri() != null) {
             this.fetchArt(customQueueItem);
         }
     }
