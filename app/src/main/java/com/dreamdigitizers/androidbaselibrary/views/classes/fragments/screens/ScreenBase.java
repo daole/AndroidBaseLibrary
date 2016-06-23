@@ -48,7 +48,9 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.mScreenActionsListener.onSetCurrentScreen(this);
+		if (this.shouldSetThisScreenAsCurrentScreen()) {
+			this.mScreenActionsListener.onSetCurrentScreen(this);
+		}
 	}
 	
 	@Override
@@ -159,6 +161,10 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 
 	public boolean shouldPopBackStack() {
 		return false;
+	}
+
+	protected boolean shouldSetThisScreenAsCurrentScreen() {
+		return true;
 	}
 
 	protected void changeActivityAndFinish(Class pTargetActivityClass) {
