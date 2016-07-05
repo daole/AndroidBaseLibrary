@@ -163,6 +163,12 @@ public abstract class ScreenBase<P extends IPresenterBase> extends FragmentBase 
 		return false;
 	}
 
+	public void onShow() {
+	}
+
+	public void onHide() {
+	}
+
 	protected boolean shouldSetThisScreenAsCurrentScreen() {
 		return true;
 	}
