@@ -140,8 +140,8 @@ public abstract class ActivityBase extends AppCompatActivity implements Fragment
         this.changeScreen(pScreen, true, true);
     }
 
-    public void changeScreen(ScreenBase pScreen, boolean pIsUseAnimation) {
-        this.changeScreen(pScreen, true, pIsUseAnimation);
+    public void changeScreen(ScreenBase pScreen, boolean pIsAddToTransaction) {
+        this.changeScreen(pScreen, true, pIsAddToTransaction);
     }
 
     public void changeScreen(ScreenBase pScreen, boolean pIsUseAnimation, boolean pIsAddToTransaction) {
