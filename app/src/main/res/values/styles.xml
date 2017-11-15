@@ -136,8 +136,6 @@
     </style>
 
     <style name="ImageView" parent="Container.WrapContent">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
         <item name="android:scaleType">centerInside</item>
     </style>
 
